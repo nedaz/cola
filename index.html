@@ -36,44 +36,54 @@ alignment algorithms, extending the Smith-Waterman and Smith-Waterman-Gap-Affine
 methods by the ability to apply a scoring function that is an arbitrary
 function of the size of consecutive nucleotide matches.</p>
 
+<hr>
+
+<hr>
+
 <p>If you want to integrate Cola with your code, that is simple. Look into src/runCola as
 an example of how the Cola aligner object can be used.</p>
+
+<hr>
 
 <p>Once you unzip the code-base, run make in the parent directory. Then you will have the 
 executables created and will be able to follow the instructions below:</p>
 
-<p>The main access point for a user to run cola is through runCola which accepts the following arguments:
--q  : Query sequence in FASTA format
--t  : Target sequence in FASTA format
--a  : Aligner type - Choose a number from 1 to 4 for the following modes - 1 : NSGA , 2 : NS , 3 : SWGA, 4 : SW 
--o  : Aligner gap open penalty
--m  : Aligner mismatch penalty
--e  : Aligner gap extension penalty
--all: align all to all sequences (default is false)
--p : Maximum acceptable P-value (def=1)
--i : Minium acceptable identity (def=0)
--b : The bandwidth for banded mode, default is for unbanded (def=-1)</p>
+<hr>
 
-<p>N.B. Only the first 3 arguments are compulsory and the rest are optional. 
-If the aligner penalty parameters are not provided by user, defaults will be used. </p>
+<p>The main access point for a user to run cola is through runCola which accepts the following arguments:</p>
 
-<p>See following examples for more detail.</p>
+<ul>
+<li>-q  : Query sequence in FASTA format</li>
+<li>-t  : Target sequence in FASTA format</li>
+<li>-a  : Aligner type - Choose a number from 1 to 4 for the following modes - 1 : NSGA , 2 : NS , 3 : SWGA, 4 : SW </li>
+<li>-o  : Aligner gap open penalty</li>
+<li>-m  : Aligner mismatch penalty</li>
+<li>-e  : Aligner gap extension penalty</li>
+<li>-all: align all to all sequences (default is false)</li>
+<li>-p : Maximum acceptable P-value (def=1)</li>
+<li>-i : Minium acceptable identity (def=0)</li>
+<li>-b : The bandwidth for banded mode, default is for unbanded (def=-1)
+***
+**N.B. **Only the first 3 arguments are compulsory and the rest are optional. 
+If the aligner penalty parameters are not provided by user, defaults will be used. 
+***
+See following examples for more detail:
+***
+To run in one of 4 modes using the sample data provided in the sample directory:
+***</li>
+<li>1) Nonlinear Scoring Gap-Affine (NSGA): </li>
+<li><p>./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 1 </p></li>
+</ul>
 
-<p>To run in one of 4 modes using the sample data provided in the sample directory:</p>
-
-<p>1) Nonlinear Scoring Gap-Affine (NSGA): 
-./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 1 </p>
-
-<p>2) Nonlinear Scoring (NS): 
-./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 2 </p>
-
-<p>3) Smith-Waterman Gap-Affine (SWGA): 
-./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 3 </p>
-
-<p>4) Smith-Waterman (SW): 
-./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 4 </p>
-
-<p>See Cola manuscript for more detail on the underlying algorithm and methodology.</p>
+<ol>
+<li>2) Nonlinear Scoring (NS): </li>
+<li><p>./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 2 </p></li>
+<li><p>3) Smith-Waterman Gap-Affine (SWGA): </p></li>
+<li><p>./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 3 </p></li>
+<li><p>4) Smith-Waterman (SW): </p></li>
+<li><p>./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 4 </p></li>
+<li><p>See Cola manuscript for more detail on the underlying algorithm and methodology.</p></li>
+</ol>
       </section>
     </div>
 
