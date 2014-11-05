@@ -4,11 +4,11 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Cola : Modular and Configurable Optimal Sequence Alignment Tool">
+    <meta name="description" content="Cola Sequence Aligner : Modular and Configurable Optimal Sequence Aligner">
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>Cola</title>
+    <title>Cola Sequence Aligner</title>
   </head>
 
   <body>
@@ -18,8 +18,8 @@
         <header class="inner">
           <a id="forkme_banner" href="https://github.com/nedaz/cola">View on GitHub</a>
 
-          <h1 id="project_title">Cola</h1>
-          <h2 id="project_tagline">Modular and Configurable Optimal Sequence Alignment Tool</h2>
+          <h1 id="project_title">Cola Sequence Aligner</h1>
+          <h2 id="project_tagline">Modular and Configurable Optimal Sequence Aligner</h2>
 
             <section id="downloads">
               <a class="zip_download_link" href="https://github.com/nedaz/cola/zipball/master">Download this project as a .zip file</a>
@@ -62,21 +62,30 @@ executables created and will be able to follow the instructions below:</p>
 <li>-all: align all to all sequences (default is false)</li>
 <li>-p : Maximum acceptable P-value (def=1)</li>
 <li>-i : Minium acceptable identity (def=0)</li>
-<li>-b : The bandwidth for banded mode, default is for unbanded (def=-1)
-***
-**N.B. **Only the first 3 arguments are compulsory and the rest are optional. 
-If the aligner penalty parameters are not provided by user, defaults will be used. 
-***
-See following examples for more detail:
-***
-To run in one of 4 modes using the sample data provided in the sample directory:
-***</li>
-<li>1) Nonlinear Scoring Gap-Affine (NSGA): </li>
-<li><p>./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 1 </p></li>
+<li>-b : The bandwidth for banded mode, default is for unbanded (def=-1)</li>
 </ul>
 
+<hr>
+
+<hr>
+
+<p>**N.B. **Only the first 3 arguments are compulsory and the rest are optional. 
+If the aligner penalty parameters are not provided by user, defaults will be used. </p>
+
+<hr>
+
+<p>See following examples for more detail:</p>
+
+<hr>
+
+<p>To run in one of 4 modes using the sample data provided in the sample directory:</p>
+
+<hr>
+
 <ol>
-<li>2) Nonlinear Scoring (NS): </li>
+<li>1) Nonlinear Scoring Gap-Affine (NSGA): </li>
+<li><p>./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 1 </p></li>
+<li><p>2) Nonlinear Scoring (NS): </p></li>
 <li><p>./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 2 </p></li>
 <li><p>3) Smith-Waterman Gap-Affine (SWGA): </p></li>
 <li><p>./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 3 </p></li>
@@ -90,7 +99,7 @@ To run in one of 4 modes using the sample data provided in the sample directory:
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
       <footer class="inner">
-        <p class="copyright">Cola maintained by <a href="https://github.com/nedaz">nedaz</a></p>
+        <p class="copyright">Cola Sequence Aligner maintained by <a href="https://github.com/nedaz">nedaz</a></p>
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
