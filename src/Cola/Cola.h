@@ -19,7 +19,7 @@ public:
   const AlignmentCola& createAlignment(const DNAVector& tSeq, const DNAVector& qSeq,
               AlignerParams params); 
 
-  const AlignmentCola getAlignment() { return latestAlignment; }
+  AlignmentCola& getAlignment() { return latestAlignment; }
 
 private:
   AlignmentCola latestAlignment;

@@ -354,6 +354,7 @@ class DNAVector
   long long lsize() const {return m_data.lsize();}
   
   const string &getName() const;
+  const string &Name() const { return getName(); }
   /* setName
    * ---------------------
    * Sets the DNAVector's name to the specified name. Note that if
@@ -385,6 +386,10 @@ class DNAVector
       (*this)[i+n] = d[i];
   }
 
+  /** Extend with a given string of bases from the very end of the current DNAVector */
+  void ExtendWithString(const string& extension);
+  /** Extend with a given string of bases from extendFrom postition the current DNAVector */
+  void ExtendWithString(const string& extension, int extendFrom);
 
   bool Append(const DNAVector & d, int min, int max, double ident);
 
@@ -453,46 +458,47 @@ class DNAVector
 
 
   string AsString() const {
-    string s;
-    for(unsigned int i=0; i<m_data.size(); i++) s.push_back(m_data[i]);
-    return s;
+    return Substring(0);
   }
   
-  void Substring(string & s, int start, int length) const {
-    s.resize(length);
-    for(int i=0; i<length; i++) 
-      s[i] = m_data[start+i];
-  }
-
   void Substring(string & s, int start) const {
-    int length = size() -start;
-    s.resize(length);
-    for(int i=0; i<length; i++) 
-      s[i] = m_data[start+i];
-  }
-
-  string Substring(int start, int length) const {
-    string s;    
-    for(int i=0; i<length; i++) s.push_back(m_data[start+i]);
-    return s;
+    Substring(s, start, size() -start);
   }
 
   string Substring(int start) const {
     return Substring(start, size()-start);
   }
 
+  string Substring(int start, int length) const {
+    string s;    
+    Substring(s, start, length);
+    return s;
+  }
 
-
-  //char * Data() {return &m_data[0]};
-  //unsigned char * DataQual() {return &m_qual[0]};
+  void Substring(string & s, int start, int length) const {
+    if(m_data.isize()<(start+length)) { length = m_data.isize() - start; }
+    s.resize(length);
+    for(int i=0; i<length; i++) 
+      s[i] = m_data[start+i];
+  }
 
   svec<char> & Data() {return m_data;}
+  
+  /** Finds the number of base positions that match with other 
+      and returns the ratio to size of sequence (Identity) */
+  float FindIdent(const DNAVector& other) const;
  
+  // As above, but allows for homopolymer indels (as in pyrosequencing)
+  float FindIdentHP(const DNAVector& other, int max = 2, int totaldiff = 3) const;
+ 
+  /** full comparator function, given offset and size of sequence in comparator seq
+      & offset and size of sequence from the object being compared to */
+  bool compare (const DNAVector & d, int offset_orig, int len_orig, int offset_cmp, int len_cmp) const; 
 
 
  private:
   svec<char> m_data;
-  svec<int> m_qual;
+  svec<unsigned char> m_qual;
   string name;
 };
 
@@ -510,8 +516,8 @@ class vecDNAVector
 
   vecDNAVector &operator = (const vecDNAVector &other);
 
-  const DNAVector & operator [] (int i) const;
-  DNAVector & operator [] (int i);
+  virtual const DNAVector & operator [] (int i) const;
+  virtual DNAVector & operator [] (int i);
   const DNAVector &operator () (const string &name) const;
   DNAVector &operator () (const string &name);
   bool HasChromosome(const string &name) const; 
@@ -609,8 +615,13 @@ class vecDNAVector
 
   void Write(const string & fileName, bool bSkipEmpty = false) const;
   void WriteQuals(const string & fileName) const;
-  void Read(const string & fileName, bool bProteins = false, bool shortName = false, bool allUpper = true);
+  void Read(const string & fileName, bool bProteins = false, bool shortName = false, bool allUpper = true, bool bAppend = false); // Note: it can read multiple fasta files if they are separated by a comma
   void Read(const string & fileName, svec<string> & names);
+  void ReadQ(const string & fileName); // Reads a fastq file
+  void ReadOne(const string & fileName, bool bProteins = false, bool shortName = false, bool allUpper = true, bool bAppend = false); // Reads one single fasta file
+
+
+
   /* ReadPartial
    * -----------------
    * Reads a section of a fasta file into the vecDNAVector, starting at the sequence at firstToRead and reading
@@ -760,6 +771,7 @@ class vecDNAVector
    */
   void invalidateReferences(string toInvalidate);
 
+ protected:
   void setupMap();
 
   svec<DNAVector> m_data;
