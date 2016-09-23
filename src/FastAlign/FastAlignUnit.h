@@ -17,7 +17,8 @@ public:
     FastAlignQueryUnit(const string& inputFile, int stepSize): m_querySeqs(inputFile), 
                                                                m_suffixes(m_querySeqs, stepSize) {}
 
-    const DNAVector&  getQuerySeq(int seqIdx) const { return m_querySeqs[seqIdx]; }
+    const DNAVector&  getQuerySeq(int seqIdx) const { return m_querySeqs[seqIdx];        }
+    int getQuerySeqSize(int seqIdx) const           { return m_querySeqs[seqIdx].size(); }
 
      /** Return a vector of SuffixArrayElement entry indexes for a given 
        string of those Substrings that share a significant subsequence 
@@ -58,6 +59,8 @@ public:
         findAllSeeds(numOfThreads, 0); //TODO add correct identity threshold when none exact seeding is implemented
     }
 
+    int getQuerySeqSize(int seqIdx) const                           { return m_queryUnit.getQuerySeqSize(seqIdx);  } 
+    int getTargetSeqSize(int seqIdx) const                          { return m_targetSeqs[seqIdx].size();          }
     int getNumTargetSeqs() const                                    { return m_targetSeqs.getNumSeqs();            } 
     void writeSeeds(const string& overlapFile, int mode) const      { m_seeds.write(overlapFile, mode);            } 
 

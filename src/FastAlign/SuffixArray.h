@@ -196,7 +196,7 @@ template<class StringContainerType, class StringType>
 bool SuffixArray<StringContainerType, StringType>::filterLowComp(const SuffixArrayElement& sr) {
     int  idx    = sr.getIndex();
     int  offset = sr.getOffset();
-    int  end    = offset + getSuffixStep();
+    int  end    = min(offset + getSuffixStep(), m_strings[idx].isize());
     char prevC  = ' '; // Previous rep character
     char currC  = ' '; // Current character
     int  repCnt = 0;   // keep track of size of longest repeat contig
@@ -211,7 +211,7 @@ bool SuffixArray<StringContainerType, StringType>::filterLowComp(const SuffixArr
             prevC  = currC;
         }
     }
-    if((float)repCnt/getSuffixStep()>0.90 || nCnt>0.4*getSuffixStep()) { 
+    if((float)repCnt/getSuffixStep()>0.90 || nCnt>0.5*getSuffixStep()) { 
         return true;
     } else {
         return false;

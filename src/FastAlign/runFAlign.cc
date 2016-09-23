@@ -17,7 +17,7 @@ int main(int argc,char** argv)
     commandArg<string> bCmmd("-o","File to Output alignments", "alignments.out");
     commandArg<int>    cCmmd("-b","Subread block step", 10);
     commandArg<int>    dCmmd("-S","Seed size for choosing candidates", 15);
-    commandArg<double> eCmmd("-I","Minimum acceptable identity for seeding sequences", 0.6);
+    commandArg<double> eCmmd("-I","Minimum acceptable identity for seeding sequences", 0.4);
     commandArg<int>    fCmmd("-B","Bandwidth for local alignments", 3);
     commandArg<string> gCmmd("-L","Application logging file","application.log");
     commandArg<int>    threadCmmd("-T","Number of Cores to run with", 1);
@@ -58,7 +58,7 @@ int main(int argc,char** argv)
 #endif
     
     AlignmentParams params(readBlockSize, seedSize,
-                           minIdent, alignBand, 0.35);
+                           minIdent, alignBand, 0.1);
     FastAlignUnit FAUnit(targetSeqFile, querySeqFile, params, numOfThreads);
     ofstream fOut;
     fOut.open(outFile.c_str());

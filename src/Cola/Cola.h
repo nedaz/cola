@@ -17,6 +17,9 @@ public:
    * @return pointer to the requested aligner object 
    */
   const AlignmentCola& createAlignment(const DNAVector& tSeq, const DNAVector& qSeq,
+              AlignerParams params, int targetStartIdx, int queryStartIdx, int targetStopIdx, int queryStopIdx); 
+
+  const AlignmentCola& createAlignment(const DNAVector& tSeq, const DNAVector& qSeq,
               AlignerParams params); 
 
   AlignmentCola& getAlignment() { return latestAlignment; }

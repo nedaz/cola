@@ -7,6 +7,12 @@
 
 const AlignmentCola& Cola::createAlignment(const DNAVector& tSeq, const DNAVector& qSeq,
               AlignerParams params) {
+  return createAlignment(tSeq, qSeq, params, 0, 0, tSeq.isize(), qSeq.isize());
+}
+
+const AlignmentCola& Cola::createAlignment(const DNAVector& tSeq, const DNAVector& qSeq, AlignerParams params,
+                                           int targetStartIdx, int queryStartIdx,
+                                            int targetStopIdx, int queryStopIdx) { 
   IAligner* aligner;
   switch(params.getType()) {
     case NSGA: 
@@ -25,7 +31,7 @@ const AlignmentCola& Cola::createAlignment(const DNAVector& tSeq, const DNAVecto
       //TODO error message
       aligner = new NSGAaligner(tSeq, qSeq, params);
   }
-  latestAlignment = aligner->align();
+  latestAlignment = aligner->align(targetStartIdx, queryStartIdx, targetStopIdx, queryStopIdx); 
   delete aligner;
   return latestAlignment;
 }

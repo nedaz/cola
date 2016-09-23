@@ -7,11 +7,15 @@
 
 //=====================================================================
 const AlignmentCola& NSaligner::align() {
+  return align(0, 0, editGraph.targetLen, editGraph.queryLen);  // Start from the beginning of the sequences to the end 
+}
+
+const AlignmentCola& NSaligner::align(int targetStartIdx, int queryStartIdx, int targetStopIdx, int queryStopIdx) {
   // No alignment can be performed if any of the query or target sequences are of 0 size
   if(!alignment.getTargetSeq().isize() || !alignment.getQuerySeq().isize()) { return alignment; } 
   double runtime = time(NULL);
   EditGraphDepth startPoint =  EditGraphDepth(editGraph.maxContigDepth, 0);
-  double colaRuntimeFactor = traverseGraph(0, -1, editGraph.queryLen-1, editGraph.targetLen-1,
+  double colaRuntimeFactor = traverseGraph(queryStartIdx, targetStartIdx-1, queryStopIdx-1, targetStopIdx-1,
                           -1, startPoint);
   alignment.traceAlignment();
   runtime = time(NULL) - runtime;

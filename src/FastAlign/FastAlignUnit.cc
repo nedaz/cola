@@ -23,7 +23,7 @@ void FastAlignUnit::findSyntenicBlocks(int targetSeqIdx, svec<SyntenicSeeds>& ma
         if(currQIdx != qIdx && currQIdx != -1) { //New query sequence 
             // Find the best synteny & save if seed coverage of sequence passes acceptance threshold
             svec<SyntenicSeeds>::iterator ssIter = max_element(syntenies.begin(), syntenies.end());
-            if((float((*ssIter).getTotalSeedLength())/m_targetSeqs[targetSeqIdx].size()) > m_params.getMinSeedCover()){
+            if((*ssIter).getSeedCoverage(m_params.getSeedSize()*2) > m_params.getMinSeedCover()){
                 maxSynts.push_back(*ssIter);
             }
             // Prepare for next round
@@ -31,10 +31,16 @@ void FastAlignUnit::findSyntenicBlocks(int targetSeqIdx, svec<SyntenicSeeds>& ma
         }
         syntenies.push_back(SyntenicSeeds(seeds[seedIdx])); // Initialize new synteny with the latest seed and add to existing candidates
         for(int candIdx=0; candIdx<syntenies.isize()-1; candIdx++) { //For all the previously added synteny candidates try concatanating new seed
-            syntenies[candIdx].addSeed(seeds[seedIdx]); // TODO If seed was added flag so that it won't be used as initiator for new synteny candid
+            syntenies[candIdx].addSeed(seeds[seedIdx]); 
         }
         currQIdx = qIdx; 
     }
+    // For the last set find the best synteny & save if seed coverage of sequence passes acceptance threshold
+    svec<SyntenicSeeds>::iterator ssIter = max_element(syntenies.begin(), syntenies.end());
+    if((*ssIter).getSeedCoverage(m_params.getSeedSize()*2) > m_params.getMinSeedCover()){
+        maxSynts.push_back(*ssIter);
+    }
+ 
 } 
 
 void FastAlignUnit::findAllSeeds(int numOfThreads, double identThresh) {
@@ -71,13 +77,18 @@ void FastAlignUnit::alignSequence(int targetSeqIdx, ostream& sOut) const {
     findSyntenicBlocks(targetSeqIdx, candidSynts); 
     for(int i=0; i<candidSynts.isize(); i++) {
         FILE_LOG(logDEBUG4) << candidSynts[i].toString();
+//cout<<candidSynts[i].getMaxCumIndelSize()<<endl;
         int queryIdx = candidSynts[i].getQueryIdx();
+        if(m_targetSeqs[targetSeqIdx].Name() == getQuerySeq(queryIdx).Name()) { continue; }
         Cola cola1 = Cola();
-        const DNAVector& target = m_targetSeqs[targetSeqIdx];
-        const DNAVector& query  = getQuerySeq(queryIdx);
-        cola1.createAlignment(target, query, AlignerParams(candidSynts[i].getMaxIndelSize(), SWGA));
+        DNAVector target = m_targetSeqs[targetSeqIdx];
+        DNAVector query   = getQuerySeq(queryIdx);
+//cout<<"       "<<candidSynts[i].getInitTargetOffset()<<"   "<<candidSynts[i].getInitQueryOffset()<<"  "<<candidSynts[i].getLastTargetIdx()<< "   " << candidSynts[i].getLastQueryIdx() << endl;
+//cout<<"      " <<candidSynts[i].toString()<<endl;
+        cola1.createAlignment(target, query, AlignerParams(candidSynts[i].getMaxCumIndelSize(), SWGA), candidSynts[i].getInitTargetOffset(), 
+                              candidSynts[i].getInitQueryOffset(), candidSynts[i].getLastTargetIdx(), candidSynts[i].getLastQueryIdx());
         Alignment& cAlgn = cola1.getAlignment();
-        if(cAlgn.getIdentityScore()>=m_params.getMinIdentity() & target.Name()!=query.Name()) {
+        if(cAlgn.getIdentityScore()>=m_params.getMinIdentity()) {
             sOut << target.Name() << " vs " << query.Name() << endl;
             cAlgn.print(0,1,sOut,100);
         } else {

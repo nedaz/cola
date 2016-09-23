@@ -119,16 +119,33 @@ private:
 class SyntenicSeeds: public SeedArray 
 {
 public:
-    SyntenicSeeds() : m_queryIdx(-1), m_totalSize(0), m_maxIndelSize(0) {};
-    SyntenicSeeds(const SeedCandid& sC) : m_queryIdx(sC.getQueryIdx()), m_totalSize(0), m_maxIndelSize(0) { 
+    SyntenicSeeds() : m_queryIdx(-1), m_totalSize(0), m_maxIndelSize(0), m_cumIndelSize(0) {};
+    SyntenicSeeds(const SeedCandid& sC) : m_queryIdx(sC.getQueryIdx()), m_totalSize(0), m_maxIndelSize(0), m_cumIndelSize(0) { 
         initSeed(sC);
     };
 
     int  getQueryIdx() const           { return m_queryIdx;      }
     int  getTotalSeedLength() const    { return m_totalSize;     }
     int  getMaxIndelSize() const       { return m_maxIndelSize;  } 
-    void  setQueryIndex(int qIdx)      { m_queryIdx = qIdx;      }
+     int getMaxCumIndelSize() const;  // Return the maximum between the cumulative and none cumulative indel size
+    void setQueryIndex(int qIdx)       { m_queryIdx = qIdx;      }
     
+    /** Returns the start and end of the seeds for query or target, whichever is smaller, 
+        returns 0 for single seeds that are shorter than the given threshold */ 
+    float getSeedCoverage(int singleSeedThresh); 
+
+    /** Functions that return the offset of the first seed in the synteny */
+    int getInitQueryOffset() const     { return this->m_seeds[0].getQueryOffset();  }
+    int getInitTargetOffset() const    { return this->m_seeds[0].getTargetOffset(); }
+
+    /** Functions that return the offset plus length of the last seed in the synteny */
+    int getLastQueryIdx() const     { return getLatestSeed().getQueryOffset() + getLatestSeed().getSeedLength();  }
+    int getLastTargetIdx() const    { return getLatestSeed().getTargetOffset() + getLatestSeed().getSeedLength(); }
+
+    /** Functions that return the offset plus length of the last seed in the synteny */
+    int getQueryCoverLength() const     { return (getLastQueryIdx()-getInitQueryOffset());   }
+    int getTargetCoverLength() const    { return (getLastTargetIdx()-getInitTargetOffset()); } 
+
     bool operator<(SyntenicSeeds other) const { return getTotalSeedLength() < other.getTotalSeedLength(); } 
 
     /** Initialize with the first Seed. Note that this function must be called with first seed before adding any otheres */
@@ -146,12 +163,13 @@ public:
 
 private: 
     /** Must call hasSeed & make sure seeds exist before using this function */
-    const SeedCandid& getLatestSeed() { return this->m_seeds.back();   }
-    bool hasSeed()                    { return !this->m_seeds.empty(); } 
+    const SeedCandid& getLatestSeed() const { return this->m_seeds[this->m_seeds.isize()-1];   }
+    bool hasSeed()                          { return !this->m_seeds.empty();                   } 
 
     int     m_queryIdx;              /// Index of query to which these seeds belong
     int     m_totalSize;             /// The sum of the length of all seeds 
     int     m_maxIndelSize;          /// The longest indel size that the list of seeds entail 
+    int     m_cumIndelSize;          /// The accumulative indel length
 };
 //======================================================
 

@@ -16,6 +16,7 @@ public:
    * @return Returns the Alignment object which contains the alignment strings and other data
    */
   virtual const AlignmentCola& align() = 0;
+  virtual const AlignmentCola& align(int targetStartIdx, int queryStartIdx, int targetStopIdx, int queryStopIdx) = 0;
 
   /** Returns the alignment object which contains the alignment strings and info **/
   virtual const AlignmentCola& getAlignment() = 0;
