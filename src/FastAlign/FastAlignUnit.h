@@ -7,7 +7,6 @@
 #include "src/FastAlign/SuffixArray.h"
 #include "src/FastAlign/DNASeqs.h"
 #include "src/FastAlign/SeedingObjects.h"
-#include "src/FastAlign/SeedingThreads.h"
 
 
 //======================================================
@@ -44,12 +43,16 @@ private:
 //Forward declaration
 class FindSeedsThread;
 class FindSeedsSingleThread;
+class AlignmentThread;
+class AlignmentSingleThread;
 
 //======================================================
 class FastAlignUnit
 {
     friend class FindSeedsThread;
     friend class FindSeedsSingleThread;
+    friend class AlignmentThread;
+    friend class AlignmentSingleThread;
 
 public:
     // Basic Constructor used for finding overlaps
@@ -65,7 +68,7 @@ public:
     void writeSeeds(const string& overlapFile, int mode) const      { m_seeds.write(overlapFile, mode);            } 
 
 
-   void alignAllSeqs(ostream& sOut) const;
+   void alignAllSeqs(int numThreads, ostream& sOut);
 
 
 protected:

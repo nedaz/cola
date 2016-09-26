@@ -1,5 +1,5 @@
-#ifndef _ASSEMBLYPARAMS_H_
-#define _ASSEMBLYPARAMS_H_
+#ifndef _ALIGNMENT_PARAMS_H_
+#define _ALIGNMENT_PARAMS_H_
 //======================================================
 class AlignmentParams 
 {
@@ -32,4 +32,4 @@ private:
 };
 //======================================================
 
-#endif // _ASSEMBLYPARAMS_H_
+#endif // _ALIGNMENT_PARAMS_H_

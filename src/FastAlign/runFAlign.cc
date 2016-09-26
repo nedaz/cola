@@ -36,7 +36,7 @@ int main(int argc,char** argv)
     P.registerArg(threadCmmd);
     P.parse();
 
-    string targetSeqFile    = P.GetStringValueFor(a1Cmmd);
+    string targetSeqFile   = P.GetStringValueFor(a1Cmmd);
     string querySeqFile    = P.GetStringValueFor(a2Cmmd);
     string outFile         = P.GetStringValueFor(bCmmd);
     int    readBlockSize   = P.GetIntValueFor(cCmmd);
@@ -44,7 +44,7 @@ int main(int argc,char** argv)
     double minIdent        = P.GetDoubleValueFor(eCmmd);
     int    alignBand       = P.GetIntValueFor(fCmmd);
     string applicationFile = P.GetStringValueFor(gCmmd);
-    int    numOfThreads    = P.GetIntValueFor(threadCmmd);
+    int    numThreads      = P.GetIntValueFor(threadCmmd);
     
     FILE* pFile               = fopen(applicationFile.c_str(), "w");
     Output2FILE::Stream()     = pFile;
@@ -54,15 +54,15 @@ int main(int argc,char** argv)
 #endif
     
 #if defined(OPEN_MP)
-    omp_set_num_threads(numOfThreads); //The sort functions still use OMP
+    omp_set_num_threads(numThreads); //The sort functions still use OMP
 #endif
     
     AlignmentParams params(readBlockSize, seedSize,
-                           minIdent, alignBand, 0.1);
-    FastAlignUnit FAUnit(targetSeqFile, querySeqFile, params, numOfThreads);
+                           minIdent, alignBand, 0.05); // TODO The seed coverage threshold needs to be looked into
+    FastAlignUnit FAUnit(targetSeqFile, querySeqFile, params, numThreads);
     ofstream fOut;
     fOut.open(outFile.c_str());
-    FAUnit.alignAllSeqs(fOut);
+    FAUnit.alignAllSeqs(numThreads, fOut);
     return 0;
 }
 

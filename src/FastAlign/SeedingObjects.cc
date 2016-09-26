@@ -140,7 +140,6 @@ void SyntenicSeeds::initSeed(const SeedCandid& sC) {
     m_totalSize     = sC.getSeedLength();
     m_maxIndelSize  = 0;
     m_cumIndelSize  = 0;
-//    m_maxIndelSize  = abs(sC.getQueryOffset() - sC.getTargetOffset());
 }
 
 bool SyntenicSeeds::checkSeedSynt(const SeedCandid& sC) { 

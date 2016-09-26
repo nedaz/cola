@@ -5,7 +5,8 @@
 #include "base/StringUtil.h"
 #include "extern/logger/log.h"
 #include "base/RandomStuff.h"
-#include "src/FastAlign/ThreadQueueVec.h"
+#include "src/FastAlign/SeedingThreads.h"
+#include "src/FastAlign/AlignmentThreads.h"
 #include "src/FastAlign/FastAlignUnit.h"
 
 //======================================================
@@ -43,9 +44,9 @@ void FastAlignUnit::findSyntenicBlocks(int targetSeqIdx, svec<SyntenicSeeds>& ma
  
 } 
 
-void FastAlignUnit::findAllSeeds(int numOfThreads, double identThresh) {
+void FastAlignUnit::findAllSeeds(int numThreads, double identThresh) {
     int totSize   = m_targetSeqs.getNumSeqs();
-    if(numOfThreads>totSize) { numOfThreads = totSize; }
+    if(numThreads>totSize) { numThreads = totSize; }
 
     FILE_LOG(logDEBUG1) << "Finding Seeds";
     cout << "Finding All Seeds..." << endl;
@@ -54,10 +55,10 @@ void FastAlignUnit::findAllSeeds(int numOfThreads, double identThresh) {
     ThreadQueueVec threadQueue(totSize); // Use for queueing instances threads should handle
     ThreadHandler th;
 
-    for (int i=0; i<numOfThreads; i++) {
+    for (int i=0; i<numThreads; i++) {
         char tmp[256];
         sprintf(tmp, "%d", i);
-        string init = "init_";
+        string init = "init_findSeeds";
         init += tmp;
         th.AddThread(new FindSeedsSingleThread(threadQueue, *this, i));
         th.Feed(i, init);
@@ -77,18 +78,24 @@ void FastAlignUnit::alignSequence(int targetSeqIdx, ostream& sOut) const {
     findSyntenicBlocks(targetSeqIdx, candidSynts); 
     for(int i=0; i<candidSynts.isize(); i++) {
         FILE_LOG(logDEBUG4) << candidSynts[i].toString();
-//cout<<candidSynts[i].getMaxCumIndelSize()<<endl;
+//cout<<"Indel size: " << candidSynts[i].getMaxCumIndelSize()<<endl;
+//cout<<"Seed Count: " << candidSynts[i].getNumSeeds()<<endl;
+//cout<<"Seed Cover: " << candidSynts[i].getSeedCoverage(30)<<endl;
         int queryIdx = candidSynts[i].getQueryIdx();
         if(m_targetSeqs[targetSeqIdx].Name() == getQuerySeq(queryIdx).Name()) { continue; }
         Cola cola1 = Cola();
         DNAVector target = m_targetSeqs[targetSeqIdx];
         DNAVector query   = getQuerySeq(queryIdx);
-//cout<<"       "<<candidSynts[i].getInitTargetOffset()<<"   "<<candidSynts[i].getInitQueryOffset()<<"  "<<candidSynts[i].getLastTargetIdx()<< "   " << candidSynts[i].getLastQueryIdx() << endl;
-//cout<<"      " <<candidSynts[i].toString()<<endl;
-        cola1.createAlignment(target, query, AlignerParams(candidSynts[i].getMaxCumIndelSize(), SWGA), candidSynts[i].getInitTargetOffset(), 
+//cout<<"Alignment Range: "<<candidSynts[i].getInitTargetOffset()<<"   "<<candidSynts[i].getInitQueryOffset()<<"  "<<candidSynts[i].getLastTargetIdx()<< "   " << candidSynts[i].getLastQueryIdx() << endl;
+//cout<<"Syntenic seeds:  " <<candidSynts[i].toString()<<endl;
+        int colaIndent = candidSynts[i].getMaxCumIndelSize();
+        if(colaIndent>500) { colaIndent = 500; } //This is a temporary hack until the bandwidth function in Cola is fixed so that it doesn't require cumulative indel size
+//cout<<"Cola Indent: " << colaIndent<<endl;
+        cola1.createAlignment(target, query, AlignerParams(colaIndent, SWGA), candidSynts[i].getInitTargetOffset(), 
                               candidSynts[i].getInitQueryOffset(), candidSynts[i].getLastTargetIdx(), candidSynts[i].getLastQueryIdx());
         Alignment& cAlgn = cola1.getAlignment();
         if(cAlgn.getIdentityScore()>=m_params.getMinIdentity()) {
+//cout<<"Aligned **********************************************"<<endl;
             sOut << target.Name() << " vs " << query.Name() << endl;
             cAlgn.print(0,1,sOut,100);
         } else {
@@ -98,11 +105,30 @@ void FastAlignUnit::alignSequence(int targetSeqIdx, ostream& sOut) const {
 }
 
 
-void FastAlignUnit::alignAllSeqs( ostream& sOut) const {
-    for(int i=0; i<getNumTargetSeqs(); i++) {
-cout<<i<<endl;
-        alignSequence(i, sOut);
+void FastAlignUnit::alignAllSeqs(int numThreads, ostream& sOut) {
+    int totSize   = m_targetSeqs.getNumSeqs();
+    if(numThreads>totSize) { numThreads = totSize; }
+
+    FILE_LOG(logDEBUG1) << "Aligning "; 
+    cout << "Finding Syntenic seeds and aligning sequences..." << endl;
+
+    ThreadQueueVec threadQueue(totSize); // Use for queueing instances threads should handle
+    ThreadHandler th;
+
+    for (int i=0; i<numThreads; i++) {
+        char tmp[256];
+        sprintf(tmp, "%d", i);
+        string init = "init_alignment_";
+        init += tmp;
+        th.AddThread(new AlignmentSingleThread(threadQueue, *this, i, sOut));
+        th.Feed(i, init);
     }
+    while (!th.AllDone()) {
+        usleep(10000);
+    }
+
+    cout << "\r===================== " << "100.0% " << flush; 
+    cout << "Completed aligning sequences." << endl;
 }
 //======================================================
 

@@ -1,5 +1,5 @@
-#ifndef _THREADS_H_
-#define _THREADS_H_
+#ifndef _SEEDING_THREADS_H_
+#define _SEEDING_THREADS_H_
 
 #include "base/ThreadHandler.h"
 #include "src/FastAlign/ThreadQueueVec.h"
@@ -41,12 +41,11 @@ public:
 protected:
   virtual bool OnDo(const string & msg); 
 
-private:
-  ThreadQueueVec& m_threadQueue;              /// Queue for picking up jobs from the queue
+  ThreadQueueVec& m_threadQueue;      /// Queue for picking up jobs from the queue
 };
 
 
 
 
 
-#endif // _THREADS_H_
+#endif // _SEEDING_THREADS_H_
