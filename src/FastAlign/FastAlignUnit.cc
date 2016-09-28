@@ -73,7 +73,7 @@ void FastAlignUnit::findAllSeeds(int numThreads, double identThresh) {
     cout << "Completed finding Seeds." << endl;
 }
 
-void FastAlignUnit::alignSequence(int targetSeqIdx, ostream& sOut) const {
+void FastAlignUnit::alignSequence(int targetSeqIdx, ostream& sOut, ThreadMutex& mtx) const {
     svec<SyntenicSeeds> candidSynts;
     findSyntenicBlocks(targetSeqIdx, candidSynts); 
     for(int i=0; i<candidSynts.isize(); i++) {
@@ -96,8 +96,10 @@ void FastAlignUnit::alignSequence(int targetSeqIdx, ostream& sOut) const {
         Alignment& cAlgn = cola1.getAlignment();
         if(cAlgn.getIdentityScore()>=m_params.getMinIdentity()) {
 //cout<<"Aligned **********************************************"<<endl;
+            mtx.Lock();
             sOut << target.Name() << " vs " << query.Name() << endl;
             cAlgn.print(0,1,sOut,100);
+            mtx.Unlock();
         } else {
             FILE_LOG(logDEBUG4) <<"No Alignment at given significance threshold";
         }
@@ -114,13 +116,14 @@ void FastAlignUnit::alignAllSeqs(int numThreads, ostream& sOut) {
 
     ThreadQueueVec threadQueue(totSize); // Use for queueing instances threads should handle
     ThreadHandler th;
+    ThreadMutex mtx;
 
     for (int i=0; i<numThreads; i++) {
         char tmp[256];
         sprintf(tmp, "%d", i);
         string init = "init_alignment_";
         init += tmp;
-        th.AddThread(new AlignmentSingleThread(threadQueue, *this, i, sOut));
+        th.AddThread(new AlignmentSingleThread(threadQueue, *this, i, sOut, mtx));
         th.Feed(i, init);
     }
     while (!th.AllDone()) {

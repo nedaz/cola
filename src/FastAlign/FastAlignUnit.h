@@ -76,7 +76,7 @@ protected:
     const AllSeedCandids& getAllSeeds() const           { return m_seeds;    }
  
     void findAllSeeds(int numOfThreads, double identThresh); 
-    void alignSequence(int targetSeqIdx, ostream& sOut) const;
+    void alignSequence(int targetSeqIdx, ostream& sOut, ThreadMutex& mtx) const;
  
     void findSeeds(int targetSeqIdx);  
     void findSyntenicBlocks(int targetSeqIdx, svec<SyntenicSeeds>& syntBlocks) const;   

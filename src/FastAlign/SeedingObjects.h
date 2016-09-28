@@ -95,8 +95,8 @@ public:
 
     /**  0: binary 1: ascii 2: statisitics */
     void write(const string& overlapFile, int mode) const;  
-    void writeAsc(const string& readOverlapFile) const; 
-    void writeBin(const string& readOverlapFile) const; 
+    void writeAsc(const string& seedFile) const; 
+    void writeBin(const string& seedFile) const; 
     /** Writes out the number of overlaps per read */
     void writeStats(const string& statFile) const; 
 
