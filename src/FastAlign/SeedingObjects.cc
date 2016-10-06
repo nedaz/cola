@@ -135,53 +135,13 @@ void AllSeedCandids::sortSeeds() {
 //======================================================
 
 //======================================================
-void SyntenicSeeds::initSeed(const SeedCandid& sC) {
-    this->m_seeds.push_back(sC);
-    m_totalSize     = sC.getSeedLength();
-    m_maxIndelSize  = 0;
-    m_cumIndelSize  = 0;
-}
-
-bool SyntenicSeeds::checkSeedSynt(const SeedCandid& sC) { 
-    const SeedCandid& currSeed = getLatestSeed();
-    if(sC.getQueryOffset()>currSeed.getQueryOffset() && sC.getTargetOffset()>currSeed.getTargetOffset()) {
-        return true;
-    } 
-    return false;
-}
-
-bool SyntenicSeeds::addSeed(const SeedCandid& sC) { 
-    if(checkSeedSynt(sC)) {
-        addSeedOrdered(sC);
-        return true; //Candidate has been added
-    } else {
-        return false; //Candidate has not been added
+string SeedsSubset::toString() const {
+    stringstream ss;
+    for(int i=m_startIdx; i<m_endIdx; i++) {
+        ss << m_seeds[i].toString() << endl;  
     }
+    return ss.str();
 }
+//======================================================
 
-void SyntenicSeeds::addSeedOrdered(const SeedCandid& sC) { 
-    const SeedCandid& prevSeed = getLatestSeed();
-    int currSeedSize           = sC.getSeedLength();
-    m_totalSize                += currSeedSize; //Add the seed length of the latest seed to the existing total
-    //Update the max indent with the latest added seed 
-    int latestIndent = (sC.getTargetOffset()-prevSeed.getTargetOffset()) 
-                          -(sC.getQueryOffset()-prevSeed.getQueryOffset());
-    if(abs(latestIndent) > m_maxIndelSize) { m_maxIndelSize = abs(latestIndent); }
-    m_cumIndelSize += latestIndent;
-    this->m_seeds.push_back(sC);
-} 
 
-float SyntenicSeeds::getSeedCoverage(int singleSeedThresh) { 
-    if( getNumSeeds()<1)                                                        { return 0; } 
-    if(getNumSeeds()==1 && this->m_seeds[0].getSeedLength()<singleSeedThresh)   { return 0; }
-    if(getNumSeeds()==2 && this->m_seeds[0].getSeedLength()<2*singleSeedThresh) { return 0; }
-
-    float queryRange  = getLatestSeed().getQueryOffset() - this->m_seeds[0].getQueryOffset();
-    float targetRange =  getLatestSeed().getTargetOffset() - this->m_seeds[0].getTargetOffset();
-    return getTotalSeedLength()/(max(queryRange, targetRange)+getLatestSeed().getSeedLength());
-}
-
-int SyntenicSeeds::getMaxCumIndelSize() const { 
-    if(m_maxIndelSize>abs(m_cumIndelSize)) { return m_maxIndelSize;         } 
-    else                                   { return abs(m_cumIndelSize);    }
-}

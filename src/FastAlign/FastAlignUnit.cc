@@ -18,32 +18,48 @@ void FastAlignUnit::findSeeds(int targetSeqIdx) {
 void FastAlignUnit::findSyntenicBlocks(int targetSeqIdx, svec<SyntenicSeeds>& maxSynts) const {
     const SeedArray& seeds = m_seeds[targetSeqIdx];
     int currQIdx     = -1;
-        svec<SyntenicSeeds> syntenies;
+    int prevIdx      =  0;  // Keep track of the previous index where the query index changed
     for(int seedIdx=0; seedIdx<seeds.getNumSeeds(); seedIdx++) {
         int qIdx = seeds[seedIdx].getQueryIdx();
-        if(currQIdx != qIdx && currQIdx != -1) { //New query sequence 
+        if((currQIdx != qIdx && currQIdx != -1) || seedIdx==seeds.getNumSeeds()-1) { //New query sequence 
             // Find the best synteny & save if seed coverage of sequence passes acceptance threshold
-            svec<SyntenicSeeds>::iterator ssIter = max_element(syntenies.begin(), syntenies.end());
-            if((*ssIter).getSeedCoverage(m_params.getSeedSize()*2) > m_params.getMinSeedCover()){
-                maxSynts.push_back(*ssIter);
+            const SyntenicSeeds& ss = searchDPSynteny(seeds, prevIdx, seedIdx);
+            if(ss.getSeedCoverage(m_params.getSeedSize()*2) > m_params.getMinSeedCover()){
+                maxSynts.push_back(ss);
             }
-            // Prepare for next round
-            syntenies.clear();
+            prevIdx = seedIdx;
         }
+        currQIdx = qIdx; 
+    }
+} 
+
+SyntenicSeeds FastAlignUnit::searchDPSynteny(const SeedArray& seeds, int startQIdx, int endQIdx) const {
+    SyntenicSeedFinder sFinder(SeedsSubset(seeds, startQIdx, endQIdx)); 
+    return sFinder.searchDP();
+}
+
+/*
+SyntenicSeeds FastAlignUnit::searchDPSynteny(const SeedArray& seeds, int startQIdx, int endQIdx) const {
+    SyntenicSeeds synteny(seeds[startQIdx]); // Initialize new synteny with the latest seed and add to existing candidates
+    for(int seedIdx=startQIdx; seedIdx<endQIdx; seedIdx++) { 
+        synteny.addSeed(seeds[seedIdx]); 
+    }
+    return synteny;
+}
+*/
+/* 
+SyntenicSeeds FastAlignUnit::searchDPSynteny(const SeedArray& seeds, int startQIdx, int endQIdx) const {
+    svec<SyntenicSeeds> syntenies;
+    for(int seedIdx=startQIdx; seedIdx<endQIdx; seedIdx++) { 
         syntenies.push_back(SyntenicSeeds(seeds[seedIdx])); // Initialize new synteny with the latest seed and add to existing candidates
         for(int candIdx=0; candIdx<syntenies.isize()-1; candIdx++) { //For all the previously added synteny candidates try concatanating new seed
             syntenies[candIdx].addSeed(seeds[seedIdx]); 
         }
-        currQIdx = qIdx; 
     }
-    // For the last set find the best synteny & save if seed coverage of sequence passes acceptance threshold
     svec<SyntenicSeeds>::iterator ssIter = max_element(syntenies.begin(), syntenies.end());
-    if((*ssIter).getSeedCoverage(m_params.getSeedSize()*2) > m_params.getMinSeedCover()){
-        maxSynts.push_back(*ssIter);
-    }
- 
-} 
-
+    return *ssIter;
+}
+*/
 void FastAlignUnit::findAllSeeds(int numThreads, double identThresh) {
     int totSize   = m_targetSeqs.getNumSeqs();
     if(numThreads>totSize) { numThreads = totSize; }

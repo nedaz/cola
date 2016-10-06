@@ -7,6 +7,7 @@
 #include "src/FastAlign/SuffixArray.h"
 #include "src/FastAlign/DNASeqs.h"
 #include "src/FastAlign/SeedingObjects.h"
+#include "src/FastAlign/SyntenicSeeds.h" 
 
 
 //======================================================
@@ -34,7 +35,7 @@ private:
 
 
 private:
-    DNASeqs                          m_querySeqs;      /// A list of sequences from which suffixes where constructed
+    DNASeqs                          m_querySeqs;      /// A list of sequences from which suffixes were constructed
     SuffixArray<DNASeqs, DNAVector>  m_suffixes;       /// Structure for creating and holding suffixes from the class DNA sequences
 };
 
@@ -80,10 +81,11 @@ protected:
  
     void findSeeds(int targetSeqIdx);  
     void findSyntenicBlocks(int targetSeqIdx, svec<SyntenicSeeds>& syntBlocks) const;   
+    SyntenicSeeds searchDPSynteny(const SeedArray& seeds, int startQIdx, int endQIdx) const; 
     const DNAVector& getQuerySeq(int seqIdx) const { return m_queryUnit.getQuerySeq(seqIdx); }
 
 private:
-    DNASeqs                m_targetSeqs;     /// A list of sequences from which suffixes where constructed
+    DNASeqs                m_targetSeqs;     /// The list of sequences for aligning 
     FastAlignQueryUnit     m_queryUnit;      /// An object that handles the query file and creating suffixes from it
     AlignmentParams        m_params;         /// Object containing the various parameters required for assembly
     AllSeedCandids         m_seeds;          /// All candidate seeds among the target/query sequences
