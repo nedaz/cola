@@ -59,7 +59,7 @@ public:
     // Basic Constructor used for finding overlaps
     FastAlignUnit(const string& targetSeqFile, const FastAlignQueryUnit& qUnit, const AlignmentParams& params, int numOfThreads, bool revCmp=false)
                   : m_targetSeqs(targetSeqFile), m_queryUnit(qUnit), 
-                    m_params(params), m_seeds(m_targetSeqs.getNumSeqs()) {
+                    m_params(params), m_seeds(m_targetSeqs.getNumSeqs()), m_revCmp(revCmp) {
         if(revCmp) { m_targetSeqs.reverseComplementAll(); }
         findAllSeeds(numOfThreads, 0); //TODO add correct identity threshold when none exact seeding is implemented
     }
@@ -90,6 +90,7 @@ private:
     const FastAlignQueryUnit&   m_queryUnit;      /// An object that handles the query file and creating suffixes from it
     AlignmentParams             m_params;         /// Object containing the various parameters required for assembly
     AllSeedCandids              m_seeds;          /// All candidate seeds among the target/query sequences
+    bool                        m_revCmp;         /// Flag is true if this is running for reverse complemented sequences
 };
 
 //======================================================

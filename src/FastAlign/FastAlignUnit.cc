@@ -113,7 +113,11 @@ void FastAlignUnit::alignSequence(int targetSeqIdx, ostream& sOut, ThreadMutex& 
         if(cAlgn.getIdentityScore()>=m_params.getMinIdentity()) {
 //cout<<"Aligned **********************************************"<<endl;
             mtx.Lock();
-            sOut << target.Name() << " vs " << query.Name() << endl;
+            if(m_revCmp) {
+                sOut << target.Name() << " vs " << query.Name() << endl;
+            } else {
+                sOut << target.Name() << "_RC" << " vs " << query.Name() << endl;
+            }
             cAlgn.print(0,1,sOut,100);
             mtx.Unlock();
         } else {
