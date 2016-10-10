@@ -59,10 +59,14 @@ int main(int argc,char** argv)
     
     AlignmentParams params(readBlockSize, seedSize,
                            minIdent, alignBand, 0.05); // TODO The seed coverage threshold needs to be looked into
-    FastAlignUnit FAUnit(targetSeqFile, querySeqFile, params, numThreads);
+    FastAlignQueryUnit qUnit(querySeqFile, readBlockSize);
+    FastAlignUnit FAUnit(targetSeqFile, qUnit, params, numThreads);
+    FastAlignUnit revFAUnit(targetSeqFile, qUnit, params, numThreads, true);
     ofstream fOut;
     fOut.open(outFile.c_str());
     FAUnit.alignAllSeqs(numThreads, fOut);
+    revFAUnit.alignAllSeqs(numThreads, fOut);
+    fOut.close();
     return 0;
 }
 

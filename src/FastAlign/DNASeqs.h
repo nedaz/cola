@@ -26,6 +26,10 @@ public:
   int getNumSeqs() const                                { return (m_seqs.size())!=0? m_seqs.size(): m_sizeInfo.size();  } 
   int getSize(int idx) const                            { return ((hasSeq(idx))? m_seqs[idx].size(): m_sizeInfo[idx]);  }
 
+  void reverseComplementAll() {
+      m_seqs.ReverseComplement();
+  }
+
   void write(const string& outFile) const; 
   void load(const string& inFile); 
 
