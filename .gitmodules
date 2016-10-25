@@ -1,0 +1,3 @@
+[submodule "ryggrad"]
+	path = ryggrad
+	url = https://github.com/GrabherrGroup/ryggrad.git
