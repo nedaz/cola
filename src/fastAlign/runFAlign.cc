@@ -12,8 +12,8 @@
 int main(int argc,char** argv)
 {
 
-    commandArg<string> a1Cmmd("-i","FASTA file containing target sequences that are to be aligned agaiinst the query data");
-    commandArg<string> a2Cmmd("-q","FASTA file containing query sequences");
+    commandArg<string> a1Cmmd("-q","FASTA file containing query sequences that are to be aligned against the reference target data");
+    commandArg<string> a2Cmmd("-t","FASTA file containing the reference target sequences");
     commandArg<string> bCmmd("-o","File to Output alignments", "alignments.out");
     commandArg<int>    cCmmd("-b","Subread block step", 2);
     commandArg<int>    dCmmd("-S","Seed size for choosing candidates", 20);
