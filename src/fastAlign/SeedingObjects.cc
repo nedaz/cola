@@ -18,30 +18,30 @@
 #include "SeedingObjects.h"
 
 //======================================================
-void SeedCandid::set(int qI, int qO, int tO, int l) {
-    m_queryIdx     = qI;
-    m_queryOffset  = qO;
-    m_targetOffset = tO;
-    m_length       = l;
+void SeedCandid::set(int tI, int tO, int qO, int l) {
+    m_targetIdx     = tI;
+    m_targetOffset  = tO;
+    m_queryOffset   = qO;
+    m_length        = l;
 }
 
 
-/** Sorted based on the primary ordering of query Index and secondary ordering of target offset **/
+/** Sorted based on the primary ordering of target Index and secondary ordering of query offset **/
 bool SeedCandid::operator < (const SeedCandid & sC) const {
-    if (getQueryIdx() != sC.getQueryIdx()) {
-        return (getQueryIdx() < sC.getQueryIdx());
+    if (getTargetIdx() != sC.getTargetIdx()) {
+        return (getTargetIdx() < sC.getTargetIdx());
     }
-    if (getTargetOffset() != sC.getTargetOffset()) {
-        return (getTargetOffset() < sC.getTargetOffset());
+    if (getQueryOffset() != sC.getQueryOffset()) {
+        return (getQueryOffset() < sC.getQueryOffset());
     }
-    return (getQueryOffset() < sC.getQueryOffset()); 
+    return (getTargetOffset() < sC.getTargetOffset()); 
 }
 
 string SeedCandid::toString() const {
     stringstream ss;
-    ss << getQueryIdx() << "\t" 
-       << getTargetOffset() << "\t" 
+    ss << getTargetIdx() << "\t" 
        << getQueryOffset() << "\t" 
+       << getTargetOffset() << "\t" 
        << getSeedLength() << "\t"; 
     return ss.str();
 }
@@ -84,9 +84,9 @@ void AllSeedCandids::writeBin(const string& seedFile) const {
         const SeedArray seeds = m_seeds[i];
         for(int j=0; j<seeds.getNumSeeds(); j++) {
             fs.Write(i);
-            fs.Write(seeds[j].getQueryIdx());
-            fs.Write(seeds[j].getQueryOffset());
+            fs.Write(seeds[j].getTargetIdx());
             fs.Write(seeds[j].getTargetOffset());
+            fs.Write(seeds[j].getQueryOffset());
             fs.Write(seeds[j].getSeedLength());
         }
     }

@@ -36,8 +36,8 @@ int main(int argc,char** argv)
     P.registerArg(threadCmmd);
     P.parse();
 
-    string targetSeqFile   = P.GetStringValueFor(a1Cmmd);
-    string querySeqFile    = P.GetStringValueFor(a2Cmmd);
+    string querySeqFile   = P.GetStringValueFor(a1Cmmd);
+    string targetSeqFile    = P.GetStringValueFor(a2Cmmd);
     string outFile         = P.GetStringValueFor(bCmmd);
     int    readBlockSize   = P.GetIntValueFor(cCmmd);
     int    seedSize        = P.GetIntValueFor(dCmmd);
@@ -62,13 +62,13 @@ int main(int argc,char** argv)
 
     AlignmentParams params(readBlockSize, seedSize,
                            minIdent, alignBand, 0.05); // TODO The seed coverage threshold needs to be looked into
-    FastAlignQueryUnit qUnit(querySeqFile, readBlockSize);
+    FastAlignTargetUnit qUnit(targetSeqFile, readBlockSize);
 
-    FastAlignUnit FAUnit(targetSeqFile, qUnit, params, numThreads);
+    FastAlignUnit FAUnit(querySeqFile, qUnit, params, numThreads);
     FAUnit.alignAllSeqs(numThreads, fOut);
 
     cout << "Reverse Complement of sequences:" << endl;
-    FastAlignUnit revFAUnit(targetSeqFile, qUnit, params, numThreads, true);
+    FastAlignUnit revFAUnit(querySeqFile, qUnit, params, numThreads, true);
     revFAUnit.alignAllSeqs(numThreads, fOut);
 
     fOut.close();

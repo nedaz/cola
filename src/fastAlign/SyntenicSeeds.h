@@ -12,32 +12,32 @@
 class SyntenicSeeds: public SeedArray 
 {
 public:
-    SyntenicSeeds() : m_queryIdx(-1), m_totalSize(0), m_maxIndelSize(0), m_cumIndelSize(0) {}
-    SyntenicSeeds(const SeedCandid& sC) : m_queryIdx(sC.getQueryIdx()), m_totalSize(0), m_maxIndelSize(0), m_cumIndelSize(0) { 
+    SyntenicSeeds() : m_targetIdx(-1), m_totalSize(0), m_maxIndelSize(0), m_cumIndelSize(0) {}
+    SyntenicSeeds(const SeedCandid& sC) : m_targetIdx(sC.getTargetIdx()), m_totalSize(0), m_maxIndelSize(0), m_cumIndelSize(0) { 
         initSeed(sC);
     }
 
-    int  getQueryIdx() const           { return m_queryIdx;      }
+    int  getTargetIdx() const          { return m_targetIdx;     }
     int  getTotalSeedLength() const    { return m_totalSize;     }
     int  getMaxIndelSize() const       { return m_maxIndelSize;  } 
      int getMaxCumIndelSize() const;  // Return the maximum between the cumulative and none cumulative indel size
-    void setQueryIndex(int qIdx)       { m_queryIdx = qIdx;      }
+    void setTargetIndex(int tIdx)      { m_targetIdx = tIdx;      }
     
-    /** Returns the start and end of the seeds for query or target, whichever is smaller, 
+    /** Returns the start and end of the seeds for target or query, whichever is smaller, 
         returns 0 for single seeds that are shorter than the given threshold */ 
     float getSeedCoverage(int singleSeedThresh) const; 
 
     /** Functions that return the offset of the first seed in the synteny */
-    int getInitQueryOffset() const     { return this->m_seeds[0].getQueryOffset();  }
-    int getInitTargetOffset() const    { return this->m_seeds[0].getTargetOffset(); }
+    int getInitTargetOffset() const     { return this->m_seeds[0].getTargetOffset();  }
+    int getInitQueryOffset() const    { return this->m_seeds[0].getQueryOffset(); }
 
     /** Functions that return the offset plus length of the last seed in the synteny */
-    int getLastQueryIdx() const     { return getLatestSeed().getQueryOffset() + getLatestSeed().getSeedLength();  }
-    int getLastTargetIdx() const    { return getLatestSeed().getTargetOffset() + getLatestSeed().getSeedLength(); }
+    int getLastTargetIdx() const     { return getLatestSeed().getTargetOffset() + getLatestSeed().getSeedLength();  }
+    int getLastQueryIdx() const    { return getLatestSeed().getQueryOffset() + getLatestSeed().getSeedLength(); }
 
     /** Functions that return the offset plus length of the last seed in the synteny */
-    int getQueryCoverLength() const     { return (getLastQueryIdx()-getInitQueryOffset());   }
-    int getTargetCoverLength() const    { return (getLastTargetIdx()-getInitTargetOffset()); } 
+    int getTargetCoverLength() const     { return (getLastTargetIdx()-getInitTargetOffset());   }
+    int getQueryCoverLength() const    { return (getLastQueryIdx()-getInitQueryOffset()); } 
 
     bool operator<(SyntenicSeeds other) const { return getTotalSeedLength() < other.getTotalSeedLength(); } 
 
@@ -50,8 +50,8 @@ public:
     /** Add seed & check for synteny before adding, returns true if added & false otherwise */
     bool addSeed(const SeedCandid& sC); 
     /** Add seed & check for synteny before adding */
-    void addSeed(int queryIndex, int queryOffset, int targetOffset, int length) {
-        this->addSeed(SeedCandid(queryIndex, queryOffset, targetOffset, length));
+    void addSeed(int targetIndex, int targetOffset, int queryOffset, int length) {
+        this->addSeed(SeedCandid(targetIndex, targetOffset, queryOffset, length));
     } 
 
 private: 
@@ -59,7 +59,7 @@ private:
     const SeedCandid& getLatestSeed() const { return this->m_seeds[this->m_seeds.isize()-1];   }
     bool hasSeed()                          { return !this->m_seeds.empty();                   } 
 
-    int     m_queryIdx;              /// Index of query to which these seeds belong
+    int     m_targetIdx;              /// Index of target to which these seeds belong
     int     m_totalSize;             /// The sum of the length of all seeds 
     int     m_maxIndelSize;          /// The longest indel size that the list of seeds entail 
     int     m_cumIndelSize;          /// The accumulative indel length

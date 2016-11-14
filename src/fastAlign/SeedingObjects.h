@@ -9,7 +9,7 @@
 class SeedCandid 
 {
 public:
-    SeedCandid() : m_queryIdx(-1), m_queryOffset(-1), m_targetOffset(-1), m_length(-1) {};
+    SeedCandid() : m_targetIdx(-1), m_targetOffset(-1), m_queryOffset(-1), m_length(-1) {};
     SeedCandid(int qI, int qO, int tO, int l) {
       set(qI, qO, tO, l);
     }
@@ -18,18 +18,18 @@ public:
 
     string toString() const;
 
-    int     getQueryIdx() const           { return m_queryIdx;      }  
-    int     getQueryOffset() const        { return m_queryOffset;   }  
-    int     getTargetOffset() const       { return m_targetOffset;  }  
-    int     getSeedLength() const         { return m_length;        }  
+    int     getTargetIdx() const           { return m_targetIdx;      }  
+    int     getTargetOffset() const        { return m_targetOffset;   }  
+    int     getQueryOffset() const         { return m_queryOffset;    }  
+    int     getSeedLength() const          { return m_length;         }  
 
     bool operator < (const SeedCandid & rO) const; 
 
 private: 
-    int     m_queryIdx;       /// The index of the sequence to which this seeding match refers to
-    int     m_queryOffset;    /// The position in the sequence where this overlap occurs from 
-    int     m_targetOffset;   /// The position in the target sequence where this seeding match occurs from 
-    int     m_length;         /// The length of the seeding match 
+    int     m_targetIdx;       /// The index of the sequence to which this seeding match refers to
+    int     m_targetOffset;    /// The position in the sequence where this overlap occurs from 
+    int     m_queryOffset;     /// The position in the query sequence where this seeding match occurs from 
+    int     m_length;          /// The length of the seeding match 
 };
 //======================================================
 
@@ -42,8 +42,8 @@ public:
     const SeedCandid& operator[](int i) const { return m_seeds[i]; }
     SeedCandid& operator[](int i)             { return m_seeds[i]; }
 
-    void addSeed(int queryIndex, int queryOffset, int targetOffset, int length) {
-        SeedCandid sC = SeedCandid(queryIndex, queryOffset, targetOffset, length);
+    void addSeed(int targetIndex, int targetOffset, int queryOffset, int length) {
+        SeedCandid sC = SeedCandid(targetIndex, targetOffset, queryOffset, length);
         m_seeds.push_back(sC);
     }
 
@@ -69,20 +69,20 @@ public:
     const SeedArray& operator[](int i) const { return m_seeds[i]; }
     SeedArray& operator[](int i)             { return m_seeds[i]; }
 
-    void addSeed(int targetIndex, int queryIndex, int targetOffset, int queryOffset, int length) {
-        m_seeds[targetIndex].addSeed(queryIndex, queryOffset, targetOffset, length);
+    void addSeed(int queryIndex, int targetIndex, int queryOffset, int targetOffset, int length) {
+        m_seeds[queryIndex].addSeed(targetIndex, targetOffset, queryOffset, length);
     }
 
-    void addSeedSync(int targetIndex, int queryIndex, int targetOffset, int queryOffset, int length) {
-        SeedCandid sC = SeedCandid(queryIndex, queryOffset, targetOffset, length);
+    void addSeedSync(int queryIndex, int targetIndex, int queryOffset, int targetOffset, int length) {
+        SeedCandid sC = SeedCandid(targetIndex, targetOffset, queryOffset, length);
         m_mutex.Lock();
-        m_seeds[targetIndex].addSeed(queryIndex, queryOffset, targetOffset, length);
+        m_seeds[queryIndex].addSeed(targetIndex, targetOffset, queryOffset, length);
         m_mutex.Unlock();
     }
 
-    void addSeedArraySync(int targetIndex, const SeedArray& sArray) {
+    void addSeedArraySync(int queryIndex, const SeedArray& sArray) {
         m_mutex.Lock();
-        m_seeds[targetIndex] = sArray;
+        m_seeds[queryIndex] = sArray;
         m_mutex.Unlock();
     }
 
@@ -107,7 +107,7 @@ private:
     string getSeedString(int index) const; 
     void addSeedFromString(const string& strIn);
 
-    svec <SeedArray> m_seeds;       /// All seed candidates, one vector per target sequence 
+    svec <SeedArray> m_seeds;       /// All seed candidates, one vector per query sequence 
     ThreadMutex  m_mutex;           /// To use for locking while assigning overlaps
 };
 //======================================================
