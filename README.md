@@ -6,7 +6,7 @@ alignment algorithms, extending the Smith-Waterman and Smith-Waterman-Gap-Affine
 methods by the ability to apply a scoring function that is an arbitrary
 function of the size of consecutive nucleotide matches.
 
-If you want to integrate Cola with your code, that is simple. Look into src/runCola as
+If you want to integrate Cola with your code, that is simple. Look into src/cola/RunCola as
 an example of how the Cola aligner object can be used.
 
 - Getting started
@@ -22,7 +22,7 @@ an example of how the Cola aligner object can be used.
 
 Once you have the executables created and will be able to follow the instructions below:
 
-The main access point for a user to run cola is through runCola which accepts the following arguments:
+The main access point for a user to run cola is through RunCola which accepts the following arguments:
 -q  : Query sequence in FASTA format
 -t  : Target sequence in FASTA format
 -a  : Aligner type - Choose a number from 1 to 4 for the following modes - 1 : NSGA , 2 : NS , 3 : SWGA, 4 : SW 
@@ -42,16 +42,16 @@ See following examples for more detail.
 To run in one of 4 modes using the sample data provided in the sample directory:
 
 1) Nonlinear Scoring Gap-Affine (NSGA): 
-./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 1 
+./RunCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 1 
 
 2) Nonlinear Scoring (NS): 
-./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 2 
+./RunCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 2 
 
 3) Smith-Waterman Gap-Affine (SWGA): 
-./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 3 
+./RunCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 3 
 
 4) Smith-Waterman (SW): 
-./runCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 4 
+./RunCola -t sample/homo.X.part.fa -q sample/canis.X.part.fa -a 4 
 
 
 See Cola manuscript for more detail on the underlying algorithm and methodology.
