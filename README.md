@@ -1,3 +1,6 @@
+Cola Sequence Aligner 
+===================
+
 Cola consists of an efficient implementation of a collection of sequence
 alignment algorithms, extending the Smith-Waterman and Smith-Waterman-Gap-Affine
 methods by the ability to apply a scoring function that is an arbitrary
@@ -6,8 +9,18 @@ function of the size of consecutive nucleotide matches.
 If you want to integrate Cola with your code, that is simple. Look into src/runCola as
 an example of how the Cola aligner object can be used.
 
-Once you unzip the code-base, run make in the parent directory. Then you will have the 
-executables created and will be able to follow the instructions below:
+- Getting started
+  - Create a git clone by running git clone https://github.com/AnanasAssembler/AnanasAssembler.git
+  N.B. Make sure you use git to clone the repository and not use other methods such as svn checkout or download az zip
+
+- Installation
+  - Use gcc version 5 or higher and CMake higher than 3.5
+  - Run ./configure in parent directory
+  - Run make -C build -j 10
+  - Binaries will be located in /bin directory
+
+
+Once you have the executables created and will be able to follow the instructions below:
 
 The main access point for a user to run cola is through runCola which accepts the following arguments:
 -q  : Query sequence in FASTA format
