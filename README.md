@@ -10,7 +10,7 @@ If you want to integrate Cola with your code, that is simple. Look into src/runC
 an example of how the Cola aligner object can be used.
 
 - Getting started
-  - Create a git clone by running git clone https://github.com/AnanasAssembler/AnanasAssembler.git
+  - Create a git clone by running git clone  https://github.com/nedaz/cola.git
   N.B. Make sure you use git to clone the repository and not use other methods such as svn checkout or download az zip
 
 - Installation
