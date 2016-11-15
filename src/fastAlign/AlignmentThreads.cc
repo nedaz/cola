@@ -34,7 +34,7 @@ bool AlignmentSingleThread::OnDo(const string & msg) {
         inc = 1;
     int currIdx = this->m_threadQueue.getNext();
     while(currIdx>=0) {
-        FILE_LOG(logDEBUG3) << "Finding syntenic seeds and aligning for sequence idx: " << currIdx; 
+        FILE_LOG(logDEBUG2) << "Finding syntenic seeds and aligning for sequence idx: " << currIdx; 
         this->m_alignerUnit.alignSequence(currIdx, m_sOut, m_mutex); 
         if (currIdx  % inc == 0) 
             cout << "\r===================== " << 100.0*currIdx/totSize 

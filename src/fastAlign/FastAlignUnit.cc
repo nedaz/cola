@@ -23,12 +23,18 @@ void FastAlignUnit::findSyntenicBlocks(int querySeqIdx, svec<SyntenicSeeds>& max
         int tIdx = seeds[seedIdx].getTargetIdx();
         if((currTIdx != tIdx && currTIdx != -1) || seedIdx==seeds.getNumSeeds()-1) { //New target sequence 
             // Find the best synteny & save if seed coverage of sequence passes acceptance threshold
-            const SyntenicSeeds& ss = searchDPSynteny(seeds, prevIdx, seedIdx);
-            FILE_LOG(logDEBUG2) << "Syntenic seeds: ";
-            FILE_LOG(logDEBUG2) << ss.toString();
-            if(ss.getSeedCoverage(m_params.getSeedSize()*2) > m_params.getMinSeedCover()){
+            int startIdx = prevIdx;
+            int endIdx   = seedIdx -1; //inclusive index
+            if(seedIdx==seeds.getNumSeeds()-1) { endIdx++; } //Last Item should is covered for
+            const SyntenicSeeds& ss = searchDPSynteny(seeds, startIdx, endIdx);
+            if(ss.getSeedCoverage(m_params.getSeedSize()) > m_params.getMinSeedCover()) {
+                FILE_LOG(logDEBUG2) << "Syntenic seeds where seed coverage passes thereshold: ";
                 maxSynts.push_back(ss);
+            } else {
+                FILE_LOG(logDEBUG2) << "Syntenic seeds where seed coverage doesn't pass thereshold: " 
+                                    << ss.getSeedCoverage(m_params.getSeedSize());
             }
+            FILE_LOG(logDEBUG3) << ss.toString();
             prevIdx = seedIdx;
         }
         currTIdx = tIdx; 
@@ -95,25 +101,24 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
     svec<SyntenicSeeds> candidSynts;
     findSyntenicBlocks(querySeqIdx, candidSynts); 
     for(int i=0; i<candidSynts.isize(); i++) {
-        FILE_LOG(logDEBUG4) << candidSynts[i].toString();
-//cout<<"Indel size: " << candidSynts[i].getMaxCumIndelSize()<<endl;
-//cout<<"Seed Count: " << candidSynts[i].getNumSeeds()<<endl;
-//cout<<"Seed Cover: " << candidSynts[i].getSeedCoverage(30)<<endl;
+        FILE_LOG(logDEBUG3) << " Aligning based on candidate syntenic seed set: " << candidSynts[i].toString();
+        FILE_LOG(logDEBUG3) << "Indel size: " << candidSynts[i].getMaxCumIndelSize() << "  Seed Count: " 
+                            << candidSynts[i].getNumSeeds() << " Seed Cover: " << candidSynts[i].getSeedCoverage(m_params.getSeedSize());
         int targetIdx = candidSynts[i].getTargetIdx();
         if(m_querySeqs[querySeqIdx].Name() == getTargetSeq(targetIdx).Name()) { continue; }
         Cola cola1 = Cola();
         DNAVector query = m_querySeqs[querySeqIdx];
         DNAVector target   = getTargetSeq(targetIdx);
-//cout<<"Alignment Range: "<<candidSynts[i].getInitQueryOffset()<<"   "<<candidSynts[i].getInitTargetOffset()<<"  "<<candidSynts[i].getLastQueryIdx()<< "   " << candidSynts[i].getLastTargetIdx() << endl;
-//cout<<"Syntenic seeds:  " <<candidSynts[i].toString()<<endl;
+        FILE_LOG(logDEBUG3) << "Alignment Range: "<<candidSynts[i].getInitQueryOffset()<<"   "<<candidSynts[i].getInitTargetOffset()
+                            <<"  "<<candidSynts[i].getLastQueryIdx()<< "   " << candidSynts[i].getLastTargetIdx() << endl;
         int colaIndent = candidSynts[i].getMaxCumIndelSize();
+        FILE_LOG(logDEBUG3) << "Cola Indent: " << colaIndent << " Will be capped at 500"; //TODO parameterise
         if(colaIndent>500) { colaIndent = 500; } //This is a temporary hack until the bandwidth function in Cola is fixed so that it doesn't require cumulative indel size
-//cout<<"Cola Indent: " << colaIndent<<endl;
         cola1.createAlignment(query, target, AlignerParams(colaIndent, SWGA), candidSynts[i].getInitQueryOffset(), 
                               candidSynts[i].getInitTargetOffset(), candidSynts[i].getLastQueryIdx(), candidSynts[i].getLastTargetIdx());
         Alignment& cAlgn = cola1.getAlignment();
         if(cAlgn.getIdentityScore()>=m_params.getMinIdentity()) {
-//cout<<"Aligned **********************************************"<<endl;
+            FILE_LOG(logDEBUG2) << " Aligned " << query.Name() << " vs. " << target.Name();
             mtx.Lock();
             if(m_revCmp) {
                 sOut << query.Name() << " vs " << target.Name() << endl;
@@ -123,7 +128,7 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
             cAlgn.print(0,1,sOut,100);
             mtx.Unlock();
         } else {
-            FILE_LOG(logDEBUG4) <<"No Alignment at given significance threshold";
+            FILE_LOG(logDEBUG2) <<"No Alignment at given significance threshold";
         }
     }   
 }

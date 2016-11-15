@@ -117,9 +117,9 @@ class SeedsSubset
 {
 public:
      SeedsSubset(const SeedArray& sA, int sIdx, int eIdx) : m_seeds(sA), m_startIdx(sIdx), m_endIdx(eIdx) {}
-     int getNumSeeds() const                      { return m_endIdx-m_startIdx;     }
-     int isize() const                            { return getNumSeeds();           }
-     const SeedCandid& operator[](int i) const    { return m_seeds[m_startIdx+i];   }
+     int getNumSeeds() const                      { return m_endIdx-m_startIdx+1;     }
+     int isize() const                            { return getNumSeeds();             }
+     const SeedCandid& operator[](int i) const    { return m_seeds[m_startIdx+i];     }
      string toString() const; 
 
 private:

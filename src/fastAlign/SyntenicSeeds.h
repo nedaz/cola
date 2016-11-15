@@ -77,6 +77,7 @@ public:
     int getSeedIdx() const            { return m_currSeedIdx;      }
     int getBestPredSeedIdx() const    { return m_bestPredSeedIdx;  }
     int getScore() const              { return m_score;            }
+    string toString() const; 
 
 private:
    int m_currSeedIdx;               /// The index of the seed to which this node relates

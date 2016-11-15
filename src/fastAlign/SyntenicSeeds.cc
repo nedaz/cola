@@ -60,13 +60,13 @@ void SyntenicSeeds::addSeedOrdered(const SeedCandid& sC) {
 } 
 
 float SyntenicSeeds::getSeedCoverage(int singleSeedThresh) const { 
-    if( getNumSeeds()<1)                                                        { return 0; } 
-    if(getNumSeeds()==1 && this->m_seeds[0].getSeedLength()<singleSeedThresh)   { return 0; }
-    if(getNumSeeds()==2 && this->m_seeds[0].getSeedLength()<2*singleSeedThresh) { return 0; }
+    if( getNumSeeds()<1)                                            { return 0;  } 
+    if(getNumSeeds()==1 && getTotalSeedLength()<singleSeedThresh)   { return -1; }
+    if(getNumSeeds()==2 && getTotalSeedLength()<2*singleSeedThresh) { return -2; }
 
     float targetRange  = getLatestSeed().getTargetOffset() - this->m_seeds[0].getTargetOffset();
     float queryRange   =  getLatestSeed().getQueryOffset() - this->m_seeds[0].getQueryOffset();
-    return getTotalSeedLength()/(max(targetRange, queryRange)+getLatestSeed().getSeedLength());
+    return (float) getTotalSeedLength()/(max(targetRange, queryRange)+getLatestSeed().getSeedLength());
 }
 
 int SyntenicSeeds::getMaxCumIndelSize() const { 
@@ -75,6 +75,14 @@ int SyntenicSeeds::getMaxCumIndelSize() const {
 }
 //======================================================
 
+//======================================================
+string SSSearchNode::toString() const {
+    stringstream ss;
+    ss << "Seed Idx: " << m_currSeedIdx << " Best predecessor seed Idx: " << m_bestPredSeedIdx
+       << " Score: "   <<  m_score; 
+    return ss.str();
+}
+//======================================================
 
 //======================================================
 void SyntenicSeedFinder::setupAdjTable(svec< svec<int> >& adjInvTable) const { 
@@ -116,6 +124,7 @@ SyntenicSeeds SyntenicSeedFinder::searchDP() const {
         }
         currNode = SSSearchNode(seedIdx, bestPredIdx, bestPredScore+m_seeds[seedIdx].getSeedLength());
         searchNodes[seedIdx] =  currNode;
+        FILE_LOG(logDEBUG4) << "Adding synteny search node at: " << seedIdx << " " << currNode.toString(); 
         // 2b. Set the best node and continue 
         if(currNode.getScore() > bestNode.getScore()) {
             bestNode = currNode;

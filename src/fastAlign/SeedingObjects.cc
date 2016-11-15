@@ -137,7 +137,7 @@ void AllSeedCandids::sortSeeds() {
 //======================================================
 string SeedsSubset::toString() const {
     stringstream ss;
-    for(int i=m_startIdx; i<m_endIdx; i++) {
+    for(int i=m_startIdx; i<=m_endIdx; i++) {
         ss << m_seeds[i].toString() << endl;  
     }
     return ss.str();
