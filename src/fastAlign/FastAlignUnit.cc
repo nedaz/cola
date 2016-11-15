@@ -24,6 +24,8 @@ void FastAlignUnit::findSyntenicBlocks(int querySeqIdx, svec<SyntenicSeeds>& max
         if((currTIdx != tIdx && currTIdx != -1) || seedIdx==seeds.getNumSeeds()-1) { //New target sequence 
             // Find the best synteny & save if seed coverage of sequence passes acceptance threshold
             const SyntenicSeeds& ss = searchDPSynteny(seeds, prevIdx, seedIdx);
+            FILE_LOG(logDEBUG2) << "Syntenic seeds: ";
+            FILE_LOG(logDEBUG2) << ss.toString();
             if(ss.getSeedCoverage(m_params.getSeedSize()*2) > m_params.getMinSeedCover()){
                 maxSynts.push_back(ss);
             }
