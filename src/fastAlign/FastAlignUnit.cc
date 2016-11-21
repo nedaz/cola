@@ -72,7 +72,7 @@ void FastAlignUnit::findAllSeeds(int numThreads, double identThresh) {
     int totSize   = m_querySeqs.getNumSeqs();
     if(numThreads>totSize) { numThreads = totSize; }
 
-    FILE_LOG(logDEBUG1) << "Finding Seeds";
+    FILE_LOG(logINFO) << "Finding Seeds";
     cout << "Finding All Seeds..." << endl;
 
     m_seeds.resize(totSize);             // Make sure enough memory is declared 
@@ -138,7 +138,7 @@ void FastAlignUnit::alignAllSeqs(int numThreads, ostream& sOut) {
     int totSize   = m_querySeqs.getNumSeqs();
     if(numThreads>totSize) { numThreads = totSize; }
 
-    FILE_LOG(logDEBUG1) << "Aligning "; 
+    FILE_LOG(logINFO) << "Aligning "; 
     cout << "Finding Syntenic seeds and aligning sequences..." << endl;
 
     ThreadQueueVec threadQueue(totSize); // Use for queueing instances threads should handle
@@ -170,7 +170,8 @@ int FastAlignTargetUnit::findSeeds(const DNAVector& querySeq, int seedSizeThresh
         FILE_LOG(logDEBUG4)  << "Iterating position in string: "<< queryIterPos;
         svec<SuffixArrayElement>::const_iterator fIt = lower_bound(suffixes.begin(), suffixes.end(), 
                                                                    SequenceWithOffset<DNAVector>(querySeq, queryIterPos), 
-                                                                   SuffixArray<DNASeqs, DNAVector>::CmpSuffixArrayElementOL(m_suffixes));
+                                                                   SuffixArray<DNASeqs, DNAVector>::CmpSuffixArrayElement(m_suffixes));
+        FILE_LOG(logDEBUG4)  << "Searching for suffix - found lower-bound: " << (*fIt).toString() << endl;
         svec<SuffixArrayElement>::const_reverse_iterator rIt(fIt);
         bool keepLooking = true;
         for (;keepLooking && fIt!=suffixes.end(); fIt++) {
@@ -193,13 +194,11 @@ bool FastAlignTargetUnit::handleIterInstance(IterType iter, map<unsigned long, i
         FILE_LOG(logDEBUG4)  << usedIter->first << "    " << (*iter).getOffset() << " has already been found as seed";
         return true; //continue 
     }
-    FILE_LOG(logDEBUG4)  << "Checking for match: "; 
     int matchLength = checkInitMatch(querySeq, queryIterPos, *iter, seedSizeThresh);
+    FILE_LOG(logDEBUG4) << "Check seed match size: " << matchLength;
     if(matchLength  < seedSizeThresh) { return false; } //Break out of looping! Suitable seed was not found
     int contactPos = queryIterPos; 
-    // Synchronized version of overlap adding that locks so no iterference occurs with other threads
     seedArray.addSeed((*iter).getIndex(), (*iter).getOffset(), contactPos, matchLength);
-
     FILE_LOG(logDEBUG3)  << "Adding seed: " << "\t" << (*iter).getIndex() << "\t" << contactPos
                          << "\t" << (*iter).getOffset() << "\t" << matchLength;
     stringsUsed_curr[(*iter).getIndex()] = contactPos + matchLength; //Record that this sequence has been covered with seeds upto this index
@@ -224,7 +223,6 @@ int FastAlignTargetUnit::checkInitMatch(const DNAVector& querySeq, int queryOffs
             break;
         }
     }
-    FILE_LOG(logDEBUG4) << "Check seed match size: " << seedSize;  
     return seedSize;
 }
 //======================================================

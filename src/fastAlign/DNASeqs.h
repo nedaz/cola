@@ -26,6 +26,9 @@ public:
   int getNumSeqs() const                                { return (m_seqs.size())!=0? m_seqs.size(): m_sizeInfo.size();  } 
   int getSize(int idx) const                            { return ((hasSeq(idx))? m_seqs[idx].size(): m_sizeInfo[idx]);  }
 
+   string getSeqByIndex(int idx, int startIdx, int len) const; 
+   string getSeqRCByIndex(int idx, int startIdx, int len) const;
+
   void reverseComplementAll() {
       m_seqs.ReverseComplement();
   }

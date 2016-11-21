@@ -41,7 +41,11 @@ public:
     int getOffset() const   { return m_offset; }
     int getStrand() const   { return m_strand; }
 
-    string toString() const;
+    string toString() const {
+        stringstream ss;
+        ss << "sequence index: " << m_index << " Offset: " << m_offset << " strand: " << m_strand;
+        return ss.str();
+    }
 
 private:
     int  m_index;   /// Index of string to which the substring comes from
@@ -91,6 +95,7 @@ public:
     void sortSuffixes(); 
     bool filterLowComp(const SuffixArrayElement& sr);  //Determine if a substring is of very low complexity (repeat character)
 
+    string toString() const;
     int getStringSize(int sIdx) const                       { return m_strings[sIdx].isize();      }
     const StringType& getString(int sIdx) const             { return m_strings[sIdx];              }  
 
@@ -105,8 +110,8 @@ public:
     int compareBases(const SuffixArrayElement& s1, const StringType& d2) const;
     int compareBases(const SuffixArrayElement& s1, const StringType& d2, int offset2) const; 
 
-    struct CmpSuffixArrayElementOL { //SuffixArrayElement comparison struct for overlap finding
-        CmpSuffixArrayElementOL(const SuffixArray<StringContainerType, StringType>& s) : m_substrings(s) {}
+    struct CmpSuffixArrayElement { //SuffixArrayElement comparison struct for seed finding
+        CmpSuffixArrayElement(const SuffixArray<StringContainerType, StringType>& s) : m_substrings(s) {}
         bool operator() (const SuffixArrayElement& s1, const SuffixArrayElement& s2) const { 
             return (m_substrings.compareBases(s1, s2) == -1);
         }
@@ -136,9 +141,9 @@ void SuffixArray<StringContainerType, StringType>::getDNA(const SuffixArrayEleme
     if(endIdx>=stringSize) { endIdx = stringSize-1; }
     int len = endIdx-startIdx+1;
     if(sr.getStrand()==1) {
-        outDNA.SetToSubOf(m_strings.getSeqByIndex(sr.getIndex()), startIdx, len); 
+        outDNA.SetToSubOf(m_strings.getSeqByIndex(sr.getIndex(), startIdx, len)); 
     } else {
-        outDNA.SetToSubOf(m_strings.getSeqRCByIndex(sr.getIndex()), startIdx, len);
+        outDNA.SetToSubOf(m_strings.getSeqRCByIndex(sr.getIndex(), startIdx, len));
     }
 
 }  
@@ -149,9 +154,9 @@ string SuffixArray<StringContainerType, StringType>::getSeq(const SuffixArrayEle
     if(endIdx>=stringSize) { endIdx = stringSize-1; }
     int to = endIdx-startIdx+1;
     if(sr.getStrand()==1) {
-        return m_strings.getSeqByIndex(sr.getIndex()).Substring(startIdx, to); 
+        return m_strings.getSeqByIndex(sr.getIndex(), startIdx, to); 
     } else {
-        return m_strings.getSeqRCByIndex(sr.getIndex()).Substring(startIdx, to); 
+        return m_strings.getSeqRCByIndex(sr.getIndex(), startIdx, to); 
     }
 }  
 
@@ -181,14 +186,15 @@ void SuffixArray<StringContainerType, StringType>::constructSuffixes() {
     for(int i=0; i<m_strings.getNumSeqs(); i++) {
         for(int j=0; j<m_strings[i].isize(); j+=getSuffixStep()) {
             SuffixArrayElement sr(i, j, 1); //i:index j:offset 
-            if(filterLowComp(sr)) { continue; }
+//            if(filterLowComp(sr)) { continue; }
             m_suffixes.push_back(sr); //i:index j:offset 
         }
     }
     sortSuffixes();
-    FILE_LOG(logDEBUG) <<"Total number of strings: " << m_strings.getNumSeqs();
+    FILE_LOG(logDEBUG4) << toString();
+    FILE_LOG(logINFO) <<"Total number of strings: " << m_strings.getNumSeqs();
     cout <<"Total number of strings: " << m_strings.getNumSeqs() << endl;
-    FILE_LOG(logDEBUG) <<"Total number of substrings: " << m_suffixes.size();
+    FILE_LOG(logINFO) <<"Total number of substrings: " << m_suffixes.size();
     cout <<"Total number of substrings: " << m_suffixes.size() << endl;
 } 
 
@@ -220,15 +226,15 @@ bool SuffixArray<StringContainerType, StringType>::filterLowComp(const SuffixArr
 
 template<class StringContainerType, class StringType>
 void SuffixArray<StringContainerType, StringType>::sortSuffixes() {
-    FILE_LOG(logDEBUG) << "Starting to sort SuffixArray";
+    FILE_LOG(logINFO) << "Starting to sort SuffixArray";
     cout << "Starting to sort SuffixArray" << endl;
     // Could not do this in header by including namespaces as std has been declared in a parent header.
     #if defined(OPEN_MP)
-        __gnu_parallel::stable_sort(m_suffixes.begin(), m_suffixes.end(), CmpSuffixArrayElementOL(*this));
+        __gnu_parallel::stable_sort(m_suffixes.begin(), m_suffixes.end(), CmpSuffixArrayElement(*this));
     #else
-        std::stable_sort(m_suffixes.begin(), m_suffixes.end(), CmpSuffixArrayElementOL(*this));
+        std::stable_sort(m_suffixes.begin(), m_suffixes.end(), CmpSuffixArrayElement(*this));
     #endif
-    FILE_LOG(logDEBUG) << "Finished sorting SuffixArray";
+    FILE_LOG(logINFO) << "Finished sorting SuffixArray";
     cout << "Finished sorting suffixes" << endl;
 }
 
@@ -241,7 +247,9 @@ int SuffixArray<StringContainerType, StringType>::compareBases(const SuffixArray
     int offset2 = s2.getOffset();
     int strand2 = s2.getStrand();
 
-    int limit = min(getStringSize(idx1)-offset1, getStringSize(idx2)-offset2);
+    int size1 = getStringSize(idx1)-offset1;
+    int size2 = getStringSize(idx2)-offset2;
+    int limit = min(size1, size2);
 
     const StringType& d1 = getString(idx1);
     const StringType& d2 = getString(idx2); 
@@ -253,7 +261,9 @@ int SuffixArray<StringContainerType, StringType>::compareBases(const SuffixArray
             return 1;  //Larger
         }
     }
-    return 0; // Same
+    if(size1 < size2)      { return -1; }
+    else if(size1 > size2) { return 1;  }
+    else                   { return 0;  } // Same
 }
 
 template<class StringContainerType, class StringType>
@@ -267,7 +277,10 @@ int SuffixArray<StringContainerType, StringType>::compareBases(const SuffixArray
     int offset1 = s1.getOffset();
     int strand1 = s1.getStrand();
 
-    int limit = min(getStringSize(idx1)-offset1, d2.size()-offset2);
+    int size1 = getStringSize(idx1)-offset1;
+    int size2 = d2.size()-offset2;
+    int limit = min(size1, size2);
+
     const StringType& d1 = getString(idx1);
     for(int i=0; i<limit; i++) {
         if(d1[offset1+i]<d2[offset2+i]) {
@@ -276,8 +289,18 @@ int SuffixArray<StringContainerType, StringType>::compareBases(const SuffixArray
             return 1;  //Larger
         }
     }
-    return 0; // Same
+    if(size1 < size2)      { return -1; }
+    else if(size1 > size2) { return 1;  }
+    else                   { return 0;  } // Same
 }
  
+template<class StringContainerType, class StringType>
+string SuffixArray<StringContainerType, StringType>::toString() const { 
+    stringstream ss;
+    for(int i=0; i<m_suffixes.isize(); i++) {
+        ss << m_suffixes[i].toString() << " - " << getSeq(i) << endl; 
+    }
+    return ss.str();
+}
  //======================================================
 #endif //_SUFFIX_ARRAY_H
