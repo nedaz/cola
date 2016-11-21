@@ -121,9 +121,9 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
             FILE_LOG(logDEBUG2) << " Aligned " << query.Name() << " vs. " << target.Name();
             mtx.Lock();
             if(m_revCmp) {
-                sOut << query.Name() << " vs " << target.Name() << endl;
-            } else {
                 sOut << query.Name() << "_RC" << " vs " << target.Name() << endl;
+            } else {
+                sOut << query.Name() << " vs " << target.Name() << endl;
             }
             cAlgn.print(0,1,sOut,100);
             mtx.Unlock();
