@@ -62,7 +62,7 @@ void SyntenicSeeds::addSeedOrdered(const SeedCandid& sC) {
 float SyntenicSeeds::getSeedCoverage(int singleSeedThresh) const { 
     if( getNumSeeds()<1)                                            { return 0;  } 
     if(getNumSeeds()==1 && getTotalSeedLength()<singleSeedThresh)   { return -1; }
-    if(getNumSeeds()==2 && getTotalSeedLength()<2*singleSeedThresh) { return -2; }
+    if(getNumSeeds()==2 && getTotalSeedLength()<singleSeedThresh) { return -2; }
 
     float targetRange  = getLatestSeed().getTargetOffset() - this->m_seeds[0].getTargetOffset();
     float queryRange   =  getLatestSeed().getQueryOffset() - this->m_seeds[0].getQueryOffset();

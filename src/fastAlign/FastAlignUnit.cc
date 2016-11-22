@@ -27,12 +27,12 @@ void FastAlignUnit::findSyntenicBlocks(int querySeqIdx, svec<SyntenicSeeds>& max
             int endIdx   = seedIdx -1; //inclusive index
             if(seedIdx==seeds.getNumSeeds()-1) { endIdx++; } //Last Item should is covered for
             const SyntenicSeeds& ss = searchDPSynteny(seeds, startIdx, endIdx);
-            if(ss.getSeedCoverage(m_params.getSeedSize()) > m_params.getMinSeedCover()) {
+            if(ss.getSeedCoverage(m_params.getSeedSize()*2) > m_params.getMinSeedCover()) {
                 FILE_LOG(logDEBUG2) << "Syntenic seeds where seed coverage passes thereshold: ";
                 maxSynts.push_back(ss);
             } else {
                 FILE_LOG(logDEBUG2) << "Syntenic seeds where seed coverage doesn't pass thereshold: " 
-                                    << ss.getSeedCoverage(m_params.getSeedSize());
+                                    << ss.getSeedCoverage(m_params.getSeedSize()*2);
             }
             FILE_LOG(logDEBUG3) << ss.toString();
             prevIdx = seedIdx;
@@ -103,7 +103,7 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
     for(int i=0; i<candidSynts.isize(); i++) {
         FILE_LOG(logDEBUG3) << " Aligning based on candidate syntenic seed set: " << candidSynts[i].toString();
         FILE_LOG(logDEBUG3) << "Indel size: " << candidSynts[i].getMaxCumIndelSize() << "  Seed Count: " 
-                            << candidSynts[i].getNumSeeds() << " Seed Cover: " << candidSynts[i].getSeedCoverage(m_params.getSeedSize());
+                            << candidSynts[i].getNumSeeds() << " Seed Cover: " << candidSynts[i].getSeedCoverage(m_params.getSeedSize()*2);
         int targetIdx = candidSynts[i].getTargetIdx();
         if(m_querySeqs[querySeqIdx].Name() == getTargetSeq(targetIdx).Name()) { continue; }
         Cola cola1 = Cola();
@@ -112,9 +112,9 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
         FILE_LOG(logDEBUG3) << "Alignment Range: "<<candidSynts[i].getInitQueryOffset()<<"   "<<candidSynts[i].getInitTargetOffset()
                             <<"  "<<candidSynts[i].getLastQueryIdx()<< "   " << candidSynts[i].getLastTargetIdx() << endl;
         int colaIndent = candidSynts[i].getMaxCumIndelSize();
-        FILE_LOG(logDEBUG3) << "Cola Indent: " << colaIndent << " Will be capped at 500"; //TODO parameterise
-        if(colaIndent>500) { colaIndent = 500; } //This is a temporary hack until the bandwidth function in Cola is fixed so that it doesn't require cumulative indel size
-        cola1.createAlignment(query, target, AlignerParams(colaIndent, SWGA), candidSynts[i].getInitQueryOffset(), 
+        if(colaIndent>200) { colaIndent = 200; }
+        FILE_LOG(logDEBUG3) << " Aligning " << query.Name() << " vs. " << target.Name() << " with cola Indent: " << colaIndent << " capped at 200" << endl;
+        cola1.createAlignment(query, target, AlignerParams(colaIndent, NSGA), candidSynts[i].getInitQueryOffset(), 
                               candidSynts[i].getInitTargetOffset(), candidSynts[i].getLastQueryIdx(), candidSynts[i].getLastTargetIdx());
         Alignment& cAlgn = cola1.getAlignment();
         if(cAlgn.getIdentityScore()>=m_params.getMinIdentity()) {

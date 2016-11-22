@@ -5,7 +5,7 @@ class AlignmentParams
 {
 public:
     AlignmentParams(int stepSize=10, int seedSize=15, 
-                    float minIdent=0.7, int alignmentBound=3, float minSeedCover=0.35)
+                    float minIdent=0.7, int alignmentBound=3, float minSeedCover=0.25)
                    :m_suffixStep(stepSize), m_seedSize(seedSize),
                     m_minIdent(minIdent), m_alignmentBound(alignmentBound), 
                     m_minSeedCover(minSeedCover)  { }
