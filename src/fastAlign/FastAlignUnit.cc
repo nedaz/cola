@@ -46,28 +46,6 @@ SyntenicSeeds FastAlignUnit::searchDPSynteny(const SeedArray& seeds, int startTI
     return sFinder.searchDP();
 }
 
-/*
-SyntenicSeeds FastAlignUnit::searchDPSynteny(const SeedArray& seeds, int startTIdx, int endTIdx) const {
-    SyntenicSeeds synteny(seeds[startTIdx]); // Initialize new synteny with the latest seed and add to existing candidates
-    for(int seedIdx=startTIdx; seedIdx<endTIdx; seedIdx++) { 
-        synteny.addSeed(seeds[seedIdx]); 
-    }
-    return synteny;
-}
-*/
-/* 
-SyntenicSeeds FastAlignUnit::searchDPSynteny(const SeedArray& seeds, int startTIdx, int endTIdx) const {
-    svec<SyntenicSeeds> syntenies;
-    for(int seedIdx=startTIdx; seedIdx<endTIdx; seedIdx++) { 
-        syntenies.push_back(SyntenicSeeds(seeds[seedIdx])); // Initialize new synteny with the latest seed and add to existing candidates
-        for(int candIdx=0; candIdx<syntenies.isize()-1; candIdx++) { //For all the previously added synteny candidates try concatanating new seed
-            syntenies[candIdx].addSeed(seeds[seedIdx]); 
-        }
-    }
-    svec<SyntenicSeeds>::iterator ssIter = max_element(syntenies.begin(), syntenies.end());
-    return *ssIter;
-}
-*/
 void FastAlignUnit::findAllSeeds(int numThreads, double identThresh) {
     int totSize   = m_querySeqs.getNumSeqs();
     if(numThreads>totSize) { numThreads = totSize; }
@@ -112,8 +90,10 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
         FILE_LOG(logDEBUG3) << "Alignment Range: "<<candidSynts[i].getInitQueryOffset()<<"   "<<candidSynts[i].getInitTargetOffset()
                             <<"  "<<candidSynts[i].getLastQueryIdx()<< "   " << candidSynts[i].getLastTargetIdx() << endl;
         int colaIndent = candidSynts[i].getMaxCumIndelSize();
+        FILE_LOG(logDEBUG3) << " Aligning " << query.Name() << " vs. " << target.Name();
+        FILE_LOG(logDEBUG3) << " with cola Indent: " << colaIndent << " capped at 200 and inital query offset: " << candidSynts[i].getInitQueryOffset() 
+                            << " initial target offset: " << candidSynts[i].getInitTargetOffset();
         if(colaIndent>200) { colaIndent = 200; }
-        FILE_LOG(logDEBUG3) << " Aligning " << query.Name() << " vs. " << target.Name() << " with cola Indent: " << colaIndent << " capped at 200" << endl;
         cola1.createAlignment(query, target, AlignerParams(colaIndent, NSGA), candidSynts[i].getInitQueryOffset(), 
                               candidSynts[i].getInitTargetOffset(), candidSynts[i].getLastQueryIdx(), candidSynts[i].getLastTargetIdx());
         Alignment& cAlgn = cola1.getAlignment();

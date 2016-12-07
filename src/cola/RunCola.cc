@@ -1,6 +1,7 @@
 #include <string>
 
 #include "ryggrad/src/base/CommandLineParser.h"
+#include "ryggrad/src/base/Logger.h"
 #include "Cola.h"
 
 
@@ -16,6 +17,7 @@ int main(int argc,char** argv)
   commandArg<double> maxPCmd("-p","Maximum acceptable P-value", 1.0);
   commandArg<double> minIdentCmd("-i","Minium acceptable identity", 0.0);
   commandArg<int>    bandedCmd("-b", "The bandwidth for banded mode, default is for unbanded", -1);
+  commandArg<string> appLogCmd("-L","Application logging file","application.log");
 
   commandLineParser P(argc,argv);
   P.SetDescription("Aligns two fasta files using Cola");
@@ -29,6 +31,7 @@ int main(int argc,char** argv)
   P.registerArg(maxPCmd);
   P.registerArg(minIdentCmd);
   P.registerArg(bandedCmd);
+  P.registerArg(appLogCmd);
 
   P.parse();
 
@@ -42,6 +45,7 @@ int main(int argc,char** argv)
   double      maxP        = P.GetDoubleValueFor(maxPCmd);
   double      minIdent    = P.GetDoubleValueFor(minIdentCmd);
   int         banded      = P.GetIntValueFor(bandedCmd);
+  string      appLogFile  = P.GetStringValueFor(appLogCmd);
 
   vecDNAVector query, target;
 
@@ -50,6 +54,10 @@ int main(int argc,char** argv)
   query.RemoveGaps();
   target.RemoveGaps();
   int i, j;
+     
+  FILE* pFile               = fopen(appLogFile.c_str(), "w");
+  Output2FILE::Stream()     = pFile;
+  FILELog::ReportingLevel() = logINFO; 
   
   for (i=0; i<target.isize(); i++) {
     for (j=0; j<query.isize(); j++) {
