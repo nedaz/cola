@@ -85,8 +85,9 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
         int targetIdx = candidSynts[i].getTargetIdx();
         if(m_querySeqs[querySeqIdx].Name() == getTargetSeq(targetIdx).Name()) { continue; }
         Cola cola1 = Cola();
-        DNAVector query = m_querySeqs[querySeqIdx];
-        DNAVector target   = getTargetSeq(targetIdx);
+        DNAVector query, target;
+        query.SetToSubOf(m_querySeqs[querySeqIdx], candidSynts[i].getInitQueryOffset());
+        target.SetToSubOf(getTargetSeq(targetIdx), candidSynts[i].getInitTargetOffset());
         FILE_LOG(logDEBUG3) << "Alignment Range: "<<candidSynts[i].getInitQueryOffset()<<"   "<<candidSynts[i].getInitTargetOffset()
                             <<"  "<<candidSynts[i].getLastQueryIdx()<< "   " << candidSynts[i].getLastTargetIdx() << endl;
         int colaIndent = candidSynts[i].getMaxCumIndelSize();
@@ -94,9 +95,9 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
         FILE_LOG(logDEBUG3) << " with cola Indent: " << colaIndent << " capped at 200 and inital query offset: " << candidSynts[i].getInitQueryOffset() 
                             << " initial target offset: " << candidSynts[i].getInitTargetOffset();
         if(colaIndent>200) { colaIndent = 200; }
-        cola1.createAlignment(query, target, AlignerParams(colaIndent, NSGA), candidSynts[i].getInitQueryOffset(), 
-                              candidSynts[i].getInitTargetOffset(), candidSynts[i].getLastQueryIdx(), candidSynts[i].getLastTargetIdx());
+        cola1.createAlignment(query, target, AlignerParams(colaIndent, SWGA));
         Alignment& cAlgn = cola1.getAlignment();
+        cAlgn.setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); //TODO pass in the strand from function calling alignSequence
         if(cAlgn.getIdentityScore()>=m_params.getMinIdentity()) {
             FILE_LOG(logDEBUG2) << " Aligned " << query.Name() << " vs. " << target.Name();
             mtx.Lock();
