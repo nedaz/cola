@@ -88,13 +88,15 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
         DNAVector query, target;
         query.SetToSubOf(m_querySeqs[querySeqIdx], candidSynts[i].getInitQueryOffset());
         target.SetToSubOf(getTargetSeq(targetIdx), candidSynts[i].getInitTargetOffset());
+        query.SetName(m_querySeqs[querySeqIdx].Name());
+        target.SetName(getTargetSeq(targetIdx).Name());
         FILE_LOG(logDEBUG3) << "Alignment Range: "<<candidSynts[i].getInitQueryOffset()<<"   "<<candidSynts[i].getInitTargetOffset()
                             <<"  "<<candidSynts[i].getLastQueryIdx()<< "   " << candidSynts[i].getLastTargetIdx() << endl;
         int colaIndent = candidSynts[i].getMaxCumIndelSize();
         FILE_LOG(logDEBUG3) << " Aligning " << query.Name() << " vs. " << target.Name();
-        FILE_LOG(logDEBUG3) << " with cola Indent: " << colaIndent << " capped at 200 and inital query offset: " << candidSynts[i].getInitQueryOffset() 
+        FILE_LOG(logDEBUG3) << " with cola Indent: " << colaIndent << " capped at 500 and inital query offset: " << candidSynts[i].getInitQueryOffset() 
                             << " initial target offset: " << candidSynts[i].getInitTargetOffset();
-        if(colaIndent>200) { colaIndent = 200; }
+        if(colaIndent>500) { colaIndent = 500; }
         cola1.createAlignment(query, target, AlignerParams(colaIndent, SWGA));
         Alignment& cAlgn = cola1.getAlignment();
         cAlgn.setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); //TODO pass in the strand from function calling alignSequence

@@ -298,7 +298,8 @@ template<class StringContainerType, class StringType>
 string SuffixArray<StringContainerType, StringType>::toString() const { 
     stringstream ss;
     for(int i=0; i<m_suffixes.isize(); i++) {
-        ss << m_suffixes[i].toString() << " - " << getSeq(i) << endl; 
+        //ss << m_suffixes[i].toString() << " - " << getSeq(i) << endl;  // For when the sequence should also be printed 
+        ss << m_suffixes[i].toString() << endl; 
     }
     return ss.str();
 }
