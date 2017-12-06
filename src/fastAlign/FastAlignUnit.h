@@ -72,13 +72,14 @@ public:
 
    void alignAllSeqs(int numThreads, ostream& sOut);
 
+    void alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& mtx) const;
+    void alignSequence(int querySeqIdx, svec<Alignment>& cAlignments) const; 
 
 protected:
     const SeedArray& getSeeds(int i) const              { return m_seeds[i]; }
     const AllSeedCandids& getAllSeeds() const           { return m_seeds;    }
  
     void findAllSeeds(int numOfThreads, double identThresh); 
-    void alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& mtx) const;
  
     void findSeeds(int querySeqIdx);  
     void findSyntenicBlocks(int querySeqIdx, svec<SyntenicSeeds>& syntBlocks) const;   

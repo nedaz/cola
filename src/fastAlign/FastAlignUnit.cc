@@ -75,7 +75,7 @@ void FastAlignUnit::findAllSeeds(int numThreads, double identThresh) {
     cout << "Completed finding Seeds." << endl;
 }
 
-void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& mtx) const {
+void FastAlignUnit::alignSequence(int querySeqIdx, svec<Alignment>& cAlignments) const {
     svec<SyntenicSeeds> candidSynts;
     findSyntenicBlocks(querySeqIdx, candidSynts); 
     for(int i=0; i<candidSynts.isize(); i++) {
@@ -98,23 +98,31 @@ void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& m
                             << " initial target offset: " << candidSynts[i].getInitTargetOffset();
         if(colaIndent>500) { colaIndent = 500; }
         cola1.createAlignment(query, target, AlignerParams(colaIndent, SWGA));
-        Alignment& cAlgn = cola1.getAlignment();
-        cAlgn.setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); //TODO pass in the strand from function calling alignSequence
-        if(cAlgn.getIdentityScore()>=m_params.getMinIdentity()) {
-            FILE_LOG(logDEBUG2) << " Aligned " << query.Name() << " vs. " << target.Name();
+        cAlignments.push_back(cola1.getAlignment());
+        cAlignments.back().setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); //TODO pass in the strand from function calling alignSequence
+    }   
+}
+
+void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& mtx) const {
+    svec<Alignment> alignments;
+    alignSequence(querySeqIdx, alignments);
+    for(Alignment& algn : alignments) {
+        if(algn.getIdentityScore()>=m_params.getMinIdentity()) {
+            FILE_LOG(logDEBUG2) << " Aligned " << algn.getQueryName() << " vs. " << algn.getTargetName();
             mtx.Lock();
             if(m_revCmp) {
-                sOut << query.Name() << "_RC" << " vs " << target.Name() << endl;
+                sOut << algn.getQueryName() << "_RC" << " vs " << algn.getTargetName() << endl;
             } else {
-                sOut << query.Name() << " vs " << target.Name() << endl;
+                sOut << algn.getQueryName() << " vs " << algn.getTargetName() << endl;
             }
-            cAlgn.print(0,1,sOut,100);
+            algn.print(0,1,sOut,100);
             mtx.Unlock();
         } else {
             FILE_LOG(logDEBUG2) <<"No Alignment at given significance threshold";
         }
     }   
 }
+
 
 
 void FastAlignUnit::alignAllSeqs(int numThreads, ostream& sOut) {
