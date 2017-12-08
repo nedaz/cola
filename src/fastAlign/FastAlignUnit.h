@@ -72,8 +72,8 @@ public:
 
    void alignAllSeqs(int numThreads, ostream& sOut);
 
-    void alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& mtx) const;
-    void alignSequence(int querySeqIdx, svec<Alignment>& cAlignments) const; 
+    void alignSequence(int querySeqIdx, svec<AlignmentInfo>& cAlignmentInfos) const; 
+    void alignSequence(int querySeqIdx, ostream& sOut , ThreadMutex& mtx) const; 
 
 protected:
     const SeedArray& getSeeds(int i) const              { return m_seeds[i]; }
@@ -86,12 +86,16 @@ protected:
     SyntenicSeeds searchDPSynteny(const SeedArray& seeds, int startTIdx, int endTIdx) const; 
     const DNAVector& getTargetSeq(int seqIdx) const { return m_targetUnit.getTargetSeq(seqIdx); }
 
+    void alignSequence(int querySeqIdx, svec<AlignmentInfo>& cAlignmentInfos, int printResults, int storeAlignmentInfo,
+                       ostream& sOut, ThreadMutex& mtx) const; 
+    void writeAlignment(const Alignment& algn, ostream& sOut, ThreadMutex& mtx) const; 
+
 private:
-    DNASeqs                     m_querySeqs;     /// The list of sequences for aligning 
+    DNASeqs                      m_querySeqs;       /// The list of sequences for aligning 
     const FastAlignTargetUnit&   m_targetUnit;      /// An object that handles the target file and creating suffixes from it
-    AlignmentParams             m_params;         /// Object containing the various parameters required for assembly
-    AllSeedCandids              m_seeds;          /// All candidate seeds among the query/target sequences
-    bool                        m_revCmp;         /// Flag is true if this is running for reverse complemented sequences
+    AlignmentParams              m_params;         /// Object containing the various parameters required for assembly
+    AllSeedCandids               m_seeds;          /// All candidate seeds among the query/target sequences
+    bool                         m_revCmp;         /// Flag is true if this is running for reverse complemented sequences
 };
 
 //======================================================

@@ -75,9 +75,22 @@ void FastAlignUnit::findAllSeeds(int numThreads, double identThresh) {
     cout << "Completed finding Seeds." << endl;
 }
 
-void FastAlignUnit::alignSequence(int querySeqIdx, svec<Alignment>& cAlignments) const {
+void FastAlignUnit::alignSequence(int querySeqIdx, svec<AlignmentInfo>& cAlignmentInfos) const { 
+    ThreadMutex mtx;
+    ofstream sOut;
+    alignSequence(querySeqIdx, cAlignmentInfos, 0, 1,  sOut, mtx);
+}
+
+void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut , ThreadMutex& mtx) const {
+    svec<AlignmentInfo>  cAlgnInfos;
+    alignSequence(querySeqIdx, cAlgnInfos, 1, 0,  sOut, mtx); 
+} 
+
+void FastAlignUnit::alignSequence(int querySeqIdx, svec<AlignmentInfo>& cAlignmentInfos,
+                                  int printResults, int storeAlignmentInfo, ostream& sOut, ThreadMutex& mtx) const {
     svec<SyntenicSeeds> candidSynts;
     findSyntenicBlocks(querySeqIdx, candidSynts); 
+    cAlignmentInfos.reserve(candidSynts.isize());
     for(int i=0; i<candidSynts.isize(); i++) {
         FILE_LOG(logDEBUG3) << " Aligning based on candidate syntenic seed set: " << candidSynts[i].toString();
         FILE_LOG(logDEBUG3) << "Indel size: " << candidSynts[i].getMaxCumIndelSize() << "  Seed Count: " 
@@ -98,31 +111,32 @@ void FastAlignUnit::alignSequence(int querySeqIdx, svec<Alignment>& cAlignments)
                             << " initial target offset: " << candidSynts[i].getInitTargetOffset();
         if(colaIndent>500) { colaIndent = 500; }
         cola1.createAlignment(query, target, AlignerParams(colaIndent, SWGA));
-        cAlignments.push_back(cola1.getAlignment());
-        cAlignments.back().setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); //TODO pass in the strand from function calling alignSequence
-    }   
-}
-
-void FastAlignUnit::alignSequence(int querySeqIdx, ostream& sOut, ThreadMutex& mtx) const {
-    svec<Alignment> alignments;
-    alignSequence(querySeqIdx, alignments);
-    for(Alignment& algn : alignments) {
-        if(algn.getIdentityScore()>=m_params.getMinIdentity()) {
-            FILE_LOG(logDEBUG2) << " Aligned " << algn.getQueryName() << " vs. " << algn.getTargetName();
-            mtx.Lock();
-            if(m_revCmp) {
-                sOut << algn.getQueryName() << "_RC" << " vs " << algn.getTargetName() << endl;
-            } else {
-                sOut << algn.getQueryName() << " vs " << algn.getTargetName() << endl;
-            }
-            algn.print(0,1,sOut,100);
-            mtx.Unlock();
-        } else {
-            FILE_LOG(logDEBUG2) <<"No Alignment at given significance threshold";
+        if(storeAlignmentInfo) {
+          cAlignmentInfos.push_back(cola1.getAlignment().getInfo());
+          cAlignmentInfos.back().setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); //TODO pass in the strand from function calling alignSequence
+        }
+        if(printResults) {
+          Alignment& tempAlgn = cola1.getAlignment();
+          tempAlgn.setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); 
+          writeAlignment(tempAlgn, sOut, mtx);
         }
     }   
 }
-
+void FastAlignUnit::writeAlignment(const Alignment& algn, ostream& sOut, ThreadMutex& mtx) const {
+    if(algn.getIdentityScore()>=m_params.getMinIdentity()) {
+        FILE_LOG(logDEBUG2) << " Aligned " << algn.getQueryName() << " vs. " << algn.getTargetName();
+        mtx.Lock();
+        if(m_revCmp) {
+            sOut << algn.getQueryName() << "_RC" << " vs " << algn.getTargetName() << endl;
+        } else {
+            sOut << algn.getQueryName() << " vs " << algn.getTargetName() << endl;
+        }
+        algn.print(0,1,sOut,100);
+        mtx.Unlock();
+    } else {
+        FILE_LOG(logDEBUG2) <<"No Alignment at given significance threshold";
+    }
+}   
 
 
 void FastAlignUnit::alignAllSeqs(int numThreads, ostream& sOut) {
