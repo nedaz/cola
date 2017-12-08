@@ -90,7 +90,9 @@ void FastAlignUnit::alignSequence(int querySeqIdx, svec<AlignmentInfo>& cAlignme
                                   int printResults, int storeAlignmentInfo, ostream& sOut, ThreadMutex& mtx) const {
     svec<SyntenicSeeds> candidSynts;
     findSyntenicBlocks(querySeqIdx, candidSynts); 
-    cAlignmentInfos.reserve(candidSynts.isize());
+    if(storeAlignmentInfo) {
+      cAlignmentInfos.reserve(candidSynts.isize());
+    }
     for(int i=0; i<candidSynts.isize(); i++) {
         FILE_LOG(logDEBUG3) << " Aligning based on candidate syntenic seed set: " << candidSynts[i].toString();
         FILE_LOG(logDEBUG3) << "Indel size: " << candidSynts[i].getMaxCumIndelSize() << "  Seed Count: " 
