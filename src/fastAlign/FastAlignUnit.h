@@ -19,6 +19,7 @@ public:
 
     const DNAVector&  getTargetSeq(int seqIdx) const { return m_targetSeqs[seqIdx];        }
     int getTargetSeqSize(int seqIdx) const           { return m_targetSeqs[seqIdx].size(); }
+    const string& getTargetSeqName(int seqIdx) const { return m_targetSeqs[seqIdx].Name(); }
 
      /** Return a vector of SuffixArrayElement entry indexes for a given 
        string of those Substrings that share a significant subsequence 
@@ -64,10 +65,12 @@ public:
         findAllSeeds(numOfThreads, 0); //TODO add correct identity threshold when none exact seeding is implemented
     }
 
-    int getTargetSeqSize(int seqIdx) const                         { return m_targetUnit.getTargetSeqSize(seqIdx); } 
-    int getQuerySeqSize(int seqIdx) const                          { return m_querySeqs[seqIdx].size();            }
-    int getNumQuerySeqs() const                                    { return m_querySeqs.getNumSeqs();              } 
-    void writeSeeds(const string& overlapFile, int mode) const     { m_seeds.write(overlapFile, mode);             } 
+    int getTargetSeqSize(int seqIdx) const                         { return m_targetUnit.getTargetSeqSize(seqIdx);  } 
+    int getQuerySeqSize(int seqIdx) const                          { return m_querySeqs[seqIdx].size();             }
+    const string& getTargetSeqName(int seqIdx) const               { return m_targetUnit.getTargetSeqName(seqIdx);  } 
+    const string& getQuerySeqName(int seqIdx) const                { return m_querySeqs[seqIdx].Name();             }
+    int getNumQuerySeqs() const                                    { return m_querySeqs.getNumSeqs();               } 
+    void writeSeeds(const string& overlapFile, int mode) const     { m_seeds.write(overlapFile, mode);              } 
 
 
    void alignAllSeqs(int numThreads, ostream& sOut);
