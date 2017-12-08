@@ -112,7 +112,7 @@ void FastAlignUnit::alignSequence(int querySeqIdx, svec<AlignmentInfo>& cAlignme
         FILE_LOG(logDEBUG3) << " with cola Indent: " << colaIndent << " capped at 500 and inital query offset: " << candidSynts[i].getInitQueryOffset() 
                             << " initial target offset: " << candidSynts[i].getInitTargetOffset();
         if(colaIndent>500) { colaIndent = 500; }
-        cola1.createAlignment(query, target, AlignerParams(colaIndent, SWGA));
+        cola1.createAlignment(target, query, AlignerParams(colaIndent, SWGA));
         if(storeAlignmentInfo) {
           cAlignmentInfos.push_back(cola1.getAlignment().getInfo());
           cAlignmentInfos.back().setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); //TODO pass in the strand from function calling alignSequence
