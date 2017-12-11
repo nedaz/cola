@@ -18,7 +18,7 @@ int main(int argc,char** argv)
     commandArg<int>    cCmmd("-b","Subread block step", 2);
     commandArg<int>    dCmmd("-S","Seed size for choosing candidates", 20);
     commandArg<double> eCmmd("-I","Minimum acceptable identity for seeding sequences", 0.4);
-    commandArg<int>    fCmmd("-B","Bandwidth for local alignments", 3);
+    commandArg<int>    fCmmd("-B","Bandwidth for local alignments", 50);
     commandArg<string> gCmmd("-L","Application logging file","application.log");
     commandArg<int>    threadCmmd("-T","Number of Cores to run with", 1);
 
