@@ -115,11 +115,11 @@ void FastAlignUnit::alignSequence(int querySeqIdx, svec<AlignmentInfo>& cAlignme
         cola1.createAlignment(target, query, AlignerParams(colaIndent, SWGA));
         if(storeAlignmentInfo) {
           cAlignmentInfos.push_back(cola1.getAlignment().getInfo());
-          cAlignmentInfos.back().setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); //TODO pass in the strand from function calling alignSequence
+          cAlignmentInfos.back().setSeqAuxInfo(candidSynts[i].getInitTargetOffset(), candidSynts[i].getInitQueryOffset(), true, true); //TODO pass in the strand from function calling alignSequence
         }
         if(printResults) {
           Alignment& tempAlgn = cola1.getAlignment();
-          tempAlgn.setSeqAuxInfo(candidSynts[i].getInitQueryOffset(), candidSynts[i].getInitTargetOffset(), true, true); 
+          tempAlgn.setSeqAuxInfo(candidSynts[i].getInitTargetOffset(), candidSynts[i].getInitQueryOffset(), true, true); 
           writeAlignment(tempAlgn, sOut, mtx);
         }
     }   
