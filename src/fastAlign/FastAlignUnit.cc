@@ -101,25 +101,29 @@ void FastAlignUnit::alignSequence(int querySeqIdx, svec<AlignmentInfo>& cAlignme
         if(m_querySeqs[querySeqIdx].Name() == getTargetSeq(targetIdx).Name()) { continue; }
         Cola cola1 = Cola();
         DNAVector query, target;
-        query.SetToSubOf(m_querySeqs[querySeqIdx], candidSynts[i].getInitQueryOffset());
-        target.SetToSubOf(getTargetSeq(targetIdx), candidSynts[i].getInitTargetOffset());
+        // extend the offsets to allow for some slack the size of the suffix step
+        int queryOffset  = max(0, candidSynts[i].getInitQueryOffset()-m_params.getSuffixStep());
+        int targetOffset = max(0, candidSynts[i].getInitTargetOffset()-m_params.getSuffixStep());
+        query.SetToSubOf(m_querySeqs[querySeqIdx], queryOffset);
+        target.SetToSubOf(getTargetSeq(targetIdx), targetOffset);
         query.SetName(m_querySeqs[querySeqIdx].Name());
         target.SetName(getTargetSeq(targetIdx).Name());
-        FILE_LOG(logDEBUG3) << "Alignment Range: "<<candidSynts[i].getInitQueryOffset()<<"   "<<candidSynts[i].getInitTargetOffset()
-                            <<"  "<<candidSynts[i].getLastQueryIdx()<< "   " << candidSynts[i].getLastTargetIdx() << endl;
+        FILE_LOG(logDEBUG3) << "Alignment Range: " << queryOffset << "   " << targetOffset
+                            << "  " <<candidSynts[i].getLastQueryIdx() << "   " << candidSynts[i].getLastTargetIdx() << endl;
         int colaIndent = candidSynts[i].getMaxCumIndelSize();
         FILE_LOG(logDEBUG3) << " Aligning " << query.Name() << " vs. " << target.Name();
-        FILE_LOG(logDEBUG3) << " with cola Indent: " << colaIndent << " capped at 500 and inital query offset: " << candidSynts[i].getInitQueryOffset() 
+        FILE_LOG(logDEBUG3) << " with cola Indent: " << colaIndent << " capped at " << m_params.getAlignBand() 
+                            << " and inital query offset: " << candidSynts[i].getInitQueryOffset() 
                             << " initial target offset: " << candidSynts[i].getInitTargetOffset();
         if(colaIndent>m_params.getAlignBand()) { colaIndent = m_params.getAlignBand(); }
         cola1.createAlignment(target, query, AlignerParams(colaIndent, SWGA));
         if(storeAlignmentInfo) {
           cAlignmentInfos.push_back(cola1.getAlignment().getInfo());
-          cAlignmentInfos.back().setSeqAuxInfo(candidSynts[i].getInitTargetOffset(), candidSynts[i].getInitQueryOffset(), true, true); //TODO pass in the strand from function calling alignSequence
+          cAlignmentInfos.back().setSeqAuxInfo(targetOffset, queryOffset, true, true); //TODO pass in the strand from function calling alignSequence
         }
         if(printResults) {
           Alignment& tempAlgn = cola1.getAlignment();
-          tempAlgn.setSeqAuxInfo(candidSynts[i].getInitTargetOffset(), candidSynts[i].getInitQueryOffset(), true, true); 
+          tempAlgn.setSeqAuxInfo(targetOffset, queryOffset, true, true); 
           writeAlignment(tempAlgn, sOut, mtx);
         }
     }   
